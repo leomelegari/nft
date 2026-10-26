@@ -31,12 +31,15 @@ import { cn } from '@/shared/lib/utils'
  * surfaces cannot drift apart in behaviour.
  */
 export function MarketFilterBar({
+  searchFieldId,
   search,
   facets,
   isLoading,
   onChange,
   trailing,
 }: {
+  /** Owned by the route, which also binds the "/" shortcut to it. */
+  searchFieldId: string
   search: ResolvedCatalogSearch
   facets: NftFacets | undefined
   isLoading: boolean
@@ -50,7 +53,7 @@ export function MarketFilterBar({
     <div className="flex flex-col gap-3 rounded-xl border border-border-soft bg-card p-3 lg:flex-row lg:items-center">
       <div className="min-w-0 lg:flex-1">
         <CatalogSearchField
-          id="market-search"
+          id={searchFieldId}
           value={search.q}
           onSubmit={(value) => onChange({ q: value })}
         />

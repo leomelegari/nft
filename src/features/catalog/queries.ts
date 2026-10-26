@@ -1,7 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/shared/api/query-keys'
 import { fetchFacets, fetchNfts } from '@/features/catalog/api'
-import { toApiParams, type ResolvedCatalogSearch } from '@/features/catalog/search-params'
 
 /**
  * Catalog listing.
@@ -14,10 +13,12 @@ import { toApiParams, type ResolvedCatalogSearch } from '@/features/catalog/sear
  *
  * `keepPreviousData` holds the previous page visible while the next one loads,
  * which avoids the grid collapsing to skeletons on every pagination click.
+ *
+ * Params are passed in rather than derived here, because the home and market
+ * screens send different ones (the market adds page size and availability)
+ * while sharing this one query.
  */
-export function useCatalogQuery(search: ResolvedCatalogSearch) {
-  const params = toApiParams(search)
-
+export function useCatalogQuery(params: Record<string, unknown>) {
   return useQuery({
     queryKey: queryKeys.nfts.list(params),
     queryFn: ({ signal }) => fetchNfts(params, signal),
@@ -25,10 +26,15 @@ export function useCatalogQuery(search: ResolvedCatalogSearch) {
   })
 }
 
-/** Facets depend only on the text query; selections do not narrow the counts. */
-export function useFacetsQuery(search: ResolvedCatalogSearch) {
-  const params = { q: search.q, tab: search.tab }
-
+/**
+ * Facet counts.
+ *
+ * Callers pass only the dimensions that should narrow the counts — the text
+ * query, the tab, and on the market the availability filter. The collection
+ * and network selections are deliberately left out, so picking one collection
+ * does not zero out every other row.
+ */
+export function useFacetsQuery(params: Record<string, unknown>) {
   return useQuery({
     queryKey: queryKeys.nfts.facets(params),
     queryFn: ({ signal }) => fetchFacets(params, signal),

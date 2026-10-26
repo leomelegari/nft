@@ -42,8 +42,8 @@ function HomePage() {
   const search = resolveSearch(Route.useSearch())
   const navigate = useNavigate({ from: '/' })
 
-  const catalog = useCatalogQuery(search)
-  const facets = useFacetsQuery(search)
+  const catalog = useCatalogQuery(toApiParams(search))
+  const facets = useFacetsQuery({ q: search.q, tab: search.tab })
 
   const applySearch = useCallback(
     (next: CatalogSearch) => {

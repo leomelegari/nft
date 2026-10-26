@@ -36,3 +36,6 @@ dist-ssr
 
 # Lighthouse
 /lighthouse-reports/
+
+# TanStack Router plugin scratch output
+.tanstack

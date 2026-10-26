@@ -14,6 +14,7 @@ import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as CarteirasRouteImport } from './routes/carteiras'
 import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as MercadoRouteImport } from './routes/mercado'
 import { Route as PagamentoRouteImport } from './routes/pagamento'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as NftSlugRouteImport } from './routes/nft.$slug'
@@ -44,6 +45,11 @@ const EntrarRoute = EntrarRouteImport.update({
   path: '/entrar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MercadoRoute = MercadoRouteImport.update({
+  id: '/mercado',
+  path: '/mercado',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PagamentoRoute = PagamentoRouteImport.update({
   id: '/pagamento',
   path: '/pagamento',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/carrinho': typeof CarrinhoRoute
   '/carteiras': typeof CarteirasRoute
   '/entrar': typeof EntrarRoute
+  '/mercado': typeof MercadoRoute
   '/pagamento': typeof PagamentoRoute
   '/perfil': typeof PerfilRoute
   '/nft/$slug': typeof NftSlugRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/carrinho': typeof CarrinhoRoute
   '/carteiras': typeof CarteirasRoute
   '/entrar': typeof EntrarRoute
+  '/mercado': typeof MercadoRoute
   '/pagamento': typeof PagamentoRoute
   '/perfil': typeof PerfilRoute
   '/nft/$slug': typeof NftSlugRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/carrinho': typeof CarrinhoRoute
   '/carteiras': typeof CarteirasRoute
   '/entrar': typeof EntrarRoute
+  '/mercado': typeof MercadoRoute
   '/pagamento': typeof PagamentoRoute
   '/perfil': typeof PerfilRoute
   '/nft/$slug': typeof NftSlugRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/carteiras'
     | '/entrar'
+    | '/mercado'
     | '/pagamento'
     | '/perfil'
     | '/nft/$slug'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/carteiras'
     | '/entrar'
+    | '/mercado'
     | '/pagamento'
     | '/perfil'
     | '/nft/$slug'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/carteiras'
     | '/entrar'
+    | '/mercado'
     | '/pagamento'
     | '/perfil'
     | '/nft/$slug'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   CarrinhoRoute: typeof CarrinhoRoute
   CarteirasRoute: typeof CarteirasRoute
   EntrarRoute: typeof EntrarRoute
+  MercadoRoute: typeof MercadoRoute
   PagamentoRoute: typeof PagamentoRoute
   PerfilRoute: typeof PerfilRoute
   NftSlugRoute: typeof NftSlugRoute
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EntrarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mercado': {
+      id: '/mercado'
+      path: '/mercado'
+      fullPath: '/mercado'
+      preLoaderRoute: typeof MercadoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pagamento': {
       id: '/pagamento'
       path: '/pagamento'
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   CarrinhoRoute: CarrinhoRoute,
   CarteirasRoute: CarteirasRoute,
   EntrarRoute: EntrarRoute,
+  MercadoRoute: MercadoRoute,
   PagamentoRoute: PagamentoRoute,
   PerfilRoute: PerfilRoute,
   NftSlugRoute: NftSlugRoute,

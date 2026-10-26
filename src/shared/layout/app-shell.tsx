@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Footer } from '@/shared/layout/footer'
 import { Header } from '@/shared/layout/header'
 import { MobileNav } from '@/shared/layout/mobile-nav'
@@ -22,6 +23,7 @@ export function AppShell({
   const [menuOpen, setMenuOpen] = useState(false)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const cartCount = useCartItemCount()
+  const navigate = useNavigate()
 
   return (
     <>
@@ -31,9 +33,10 @@ export function AppShell({
         withDivider={withHeaderDivider}
         onOpenMenu={() => setMenuOpen(true)}
         onOpenSearch={() => {
-          // Search lives in the catalog toolbar; the header icon scrolls to it
-          // until the dedicated overlay lands with the catalog feature.
-          document.getElementById('catalogo')?.scrollIntoView({ block: 'start' })
+          // Search belongs to the market screen, which owns the filter bar.
+          // The icon used to call `scrollIntoView('#catalogo')`, which was a
+          // no-op on every route other than the home page.
+          void navigate({ to: '/mercado' })
         }}
       />
 

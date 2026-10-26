@@ -9,32 +9,30 @@ import type { ResolvedCatalogSearch } from '@/features/catalog/search-params'
 import { cn } from '@/shared/lib/utils'
 
 /**
- * Catalog toolbar: tabs on the left, sort on the right.
+ * Catalog toolbar: tabs on the left, sort on the right — matching the Figma.
  *
- * In the Figma the three tab labels sit 20px apart with no padding and collide
- * on narrow viewports; here they are a scrollable tablist with real spacing and
- * roving semantics.
+ * The result count used to live here too, competing with the tabs for space
+ * and forcing them into a horizontally scrollable strip even on wide desktop
+ * viewports (an unintentional scroll affordance nothing in the design calls
+ * for). It now renders next to the pagination controls instead, where it has
+ * room and reads naturally as "N resultados" beside the page buttons.
+ *
+ * Tabs keep roving tablist semantics and wrap instead of scrolling once their
+ * own three labels no longer have to share the row with anything else.
  */
 export function CatalogToolbar({
   search,
-  total,
   onChange,
 }: {
   search: ResolvedCatalogSearch
-  total: number | undefined
   onChange: (change: Partial<ResolvedCatalogSearch>) => void
 }) {
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      {/*
-        `min-w-0` lets the tablist scroll instead of pushing into the sort
-        controls; without it the flex row shrinks the tabs and the two groups
-        collide, which is what the Figma toolbar does at this width.
-      */}
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div
         role="tablist"
         aria-label="Filtrar catálogo por categoria"
-        className="-mx-1 flex min-w-0 flex-1 gap-6 overflow-x-auto px-1 pb-1"
+        className="flex flex-wrap gap-x-6 gap-y-2"
       >
         {NFT_TABS.map((tab) => {
           const active = search.tab === tab
@@ -64,20 +62,10 @@ export function CatalogToolbar({
         })}
       </div>
 
-      {/*
-        The sort group must be allowed to shrink. Pinning it with `shrink-0`
-        pushed 109px of horizontal overflow onto the page at 1024px, which
-        section 8 explicitly forbids.
-      */}
-      <div className="flex min-w-0 items-center gap-3">
-        {total !== undefined && (
-          <p className="hidden text-caption-lg whitespace-nowrap text-text-secondary tabular-nums xl:block">
-            {total} {total === 1 ? 'resultado' : 'resultados'}
-          </p>
-        )}
+      <div className="flex shrink-0 items-center gap-3">
         <label
           htmlFor="catalog-sort"
-          className="hidden shrink-0 text-body-md whitespace-nowrap text-text-secondary xl:block"
+          className="hidden shrink-0 text-body-md whitespace-nowrap text-text-secondary lg:block"
         >
           Ordenar por:
         </label>
@@ -89,7 +77,7 @@ export function CatalogToolbar({
           aria-labelledby="catalog-sort-hint"
           value={search.sort}
           onChange={(event) => onChange({ sort: event.target.value as NftSort })}
-          className="h-9 min-w-0 flex-1 truncate rounded-md border border-border-soft bg-secondary px-2.5 text-body-md text-foreground focus-visible:outline-ring lg:max-w-[14rem]"
+          className="h-9 min-w-0 max-w-[14rem] rounded-md border border-border-soft bg-secondary px-2.5 text-body-md text-foreground focus-visible:outline-ring"
         >
           {NFT_SORTS.map((sort) => (
             <option key={sort} value={sort}>

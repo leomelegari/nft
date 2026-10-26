@@ -120,7 +120,7 @@ function HomePage() {
               />
             </div>
 
-            <CatalogToolbar search={search} total={meta?.total} onChange={changeFilter} />
+            <CatalogToolbar search={search} onChange={changeFilter} />
 
             <CatalogGrid
               nfts={catalog.data?.data ?? []}
@@ -136,6 +136,7 @@ function HomePage() {
               <CatalogPagination
                 page={meta.page}
                 totalPages={meta.totalPages}
+                total={meta.total}
                 onChange={changePage}
               />
             )}

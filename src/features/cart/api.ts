@@ -1,7 +1,10 @@
 import {
   cartSchema,
+  quoteSchema,
   type AddCartItemInput,
   type Cart,
+  type Quote,
+  type QuoteInput,
   type UpdateCartItemInput,
 } from '@/entities/cart'
 import { request } from '@/shared/api'
@@ -56,5 +59,21 @@ export function mergeGuestCart(): Promise<Cart> {
     method: 'POST',
     url: '/cart/merge',
     headers: guestHeaders(),
+  })
+}
+
+/**
+ * Issues a pricing document for the current cart.
+ *
+ * POST because the server persists the quote: the order endpoint later
+ * validates against it by id, which is what makes the stale-quote gate
+ * possible.
+ */
+export function requestQuote(input: QuoteInput): Promise<Quote> {
+  return request(quoteSchema, {
+    method: 'POST',
+    url: '/cart/quote',
+    headers: guestHeaders(),
+    data: input,
   })
 }

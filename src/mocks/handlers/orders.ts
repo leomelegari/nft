@@ -1,6 +1,7 @@
 import { http, HttpResponse, delay } from 'msw'
 import { createOrderInputSchema, type Order } from '@/entities/order'
 import { getDb, mutateDb, nextId } from '@/mocks/db/store'
+import type { MockNft } from '@/mocks/db/types'
 import { buildCart } from '@/mocks/db/cart'
 import { getScenario } from '@/mocks/scenarios'
 import { fail, handler, parseBody, requireAuth } from '@/mocks/handlers/support'
@@ -61,11 +62,57 @@ export function settleIfDue(orderId: string): void {
         : null
     order.version += 1
 
+    /**
+     * A declined order bought nothing, so everything it was holding goes back.
+     *
+     * Creating the order reserves the stock and takes the purchased lines out
+     * of the cart, which is the right behaviour while it is pending — two
+     * people must not be sold the same last edition. But the brief requires
+     * the items to survive a failure, and without this the buyer lost the
+     * basket *and* the stock stayed decremented for a sale that never
+     * happened.
+     */
+    const restored: MockNft[] = []
+    if (outcome === 'declined') {
+      for (const line of order.items) {
+        const nft = draft.nfts.find((item) => item.id === line.nftId)
+        const edition = nft?.editions.find((item) => item.id === line.editionId)
+        if (!nft || !edition) continue
+
+        edition.available += line.quantity
+        nft.available = nft.editions.reduce((sum, item) => sum + item.available, 0)
+        nft.version += 1
+        restored.push(nft)
+      }
+
+      const cart = draft.carts.find((item) => item.ownerKey === order.userId)
+      if (cart) {
+        for (const line of order.items) {
+          const stored = cart.items.find((item) => item.editionId === line.editionId)
+          if (stored) {
+            stored.quantity += line.quantity
+            continue
+          }
+          cart.items.push({
+            id: nextId('cit'),
+            nftId: line.nftId,
+            editionId: line.editionId,
+            quantity: line.quantity,
+            addedAt: new Date().toISOString(),
+          })
+        }
+        cart.updatedAt = new Date().toISOString()
+        cart.version += 1
+      }
+    }
+
     const session = draft.sessions.find((item) => item.userId === order.userId)
-    return { order, socketSessionId: session?.socketSessionId ?? null }
+    return { order, restored, socketSessionId: session?.socketSessionId ?? null }
   })
 
   if (settled) {
+    // Availability came back, so connected clients are told.
+    for (const nft of settled.restored) emitNftUpdated(nft)
     emitOrderUpdated(toWireOrder(settled.order), settled.socketSessionId)
   }
 }

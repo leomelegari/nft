@@ -133,3 +133,18 @@ export async function addFirstNftToCart(page: Page): Promise<string> {
 
   return title
 }
+
+/** Walks the checkout from the cart up to an enabled "Confirmar compra". */
+export async function reachConfirmableCheckout(page: Page): Promise<void> {
+  await page.goto('/carrinho')
+  await page.waitForLoadState('networkidle')
+  await page.getByRole('link', { name: 'Conectar e finalizar' }).click()
+
+  await expect(page).toHaveURL(/\/pagamento/)
+  await page.waitForLoadState('networkidle')
+
+  await page.getByRole('button', { name: 'Conectar carteira' }).click()
+  await page.getByRole('button', { name: 'Aprovar conexão' }).click()
+
+  await expect(page.getByRole('button', { name: 'Confirmar compra' })).toBeEnabled()
+}

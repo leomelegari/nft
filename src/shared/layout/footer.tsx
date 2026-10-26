@@ -35,14 +35,14 @@ export function Footer() {
             >
               <div
                 aria-hidden="true"
-                className="flex size-[74px] items-center justify-center rounded-full bg-primary text-ink"
+                className="flex size-18.5 items-center justify-center rounded-full bg-primary text-ink"
               >
                 <highlight.Icon className="size-8" />
               </div>
               <h2 className="mt-3 text-body-xl font-bold text-foreground">
                 {highlight.title}
               </h2>
-              <p className="mt-3 max-w-[26ch] text-body leading-[22px] text-text-secondary">
+              <p className="mt-3 max-w-[26ch] text-body leading-5.5 text-text-secondary">
                 {highlight.body}
               </p>
             </section>

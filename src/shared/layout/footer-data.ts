@@ -1,32 +1,31 @@
+import { BellIcon, PaletteIcon, ShieldCheckIcon } from 'lucide-react'
 import FacebookIcon from '@/assets/icons/social-facebook.svg?react'
 import InstagramIcon from '@/assets/icons/social-instagram.svg?react'
 import LinkedinIcon from '@/assets/icons/social-linkedin.svg?react'
 import TwitterIcon from '@/assets/icons/social-twitter.svg?react'
 import YoutubeIcon from '@/assets/icons/social-youtube.svg?react'
-import {
-  FeaturedCreatorsIcon,
-  LaunchAlertsIcon,
-  WalletSecurityIcon,
-} from '@/shared/layout/footer-icons'
 
 /**
  * The Figma renders these medallions as bare letters (W / C / D) — a
  * placeholder, not a design decision. Each one gets an icon that actually
- * represents its heading instead.
+ * represents its heading instead, from lucide-react — the icon library
+ * already installed and configured as this project's default (see
+ * `components.json`'s `iconLibrary`, and `shared/ui/dialog.tsx`'s own
+ * `XIcon` import) — rather than hand-drawn SVGs.
  */
 export const FOOTER_HIGHLIGHTS = [
   {
-    Icon: WalletSecurityIcon,
+    Icon: ShieldCheckIcon,
     title: 'Segurança da carteira',
     body: 'Proteja sua carteira e colecione arte digital verificada com confiança.',
   },
   {
-    Icon: FeaturedCreatorsIcon,
+    Icon: PaletteIcon,
     title: 'Criadores em destaque',
     body: 'Conheça artistas, estúdios e comunidades que moldam a cultura digital na rede.',
   },
   {
-    Icon: LaunchAlertsIcon,
+    Icon: BellIcon,
     title: 'Alertas de lançamentos',
     body: 'Receba calendários de cunhagem, novidades de listas de acesso e análises do mercado.',
   },

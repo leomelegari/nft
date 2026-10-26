@@ -1,11 +1,13 @@
 import { useCallback } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, useRouterState } from '@tanstack/react-router'
 import { queryKeys } from '@/shared/api/query-keys'
 import { fetchNfts } from '@/features/catalog/api'
 import { useCatalogQuery, useFacetsQuery } from '@/features/catalog/queries'
 import {
+  DEFAULT_PAGE_SIZE,
   buildSearch,
   catalogSearchSchema,
+  EMPTY_SEARCH,
   hasActiveFilters,
   resolveSearch,
   toApiParams,
@@ -13,19 +15,22 @@ import {
   type CatalogSearch,
   type ResolvedCatalogSearch,
 } from '@/features/catalog/search-params'
-import { CatalogGrid } from '@/features/catalog/catalog-grid'
 import { CatalogPagination } from '@/features/catalog/pagination'
-import { FiltersPanel } from '@/features/catalog/filters-panel'
-import { CatalogSearchField, CatalogToolbar } from '@/features/catalog/toolbar'
-import { MobileFilters } from '@/features/catalog/mobile-filters'
+import { CatalogToolbar } from '@/features/catalog/toolbar'
+import { ActiveFilterChips } from '@/features/catalog/market/active-chips'
+import { MarketFilterBar } from '@/features/catalog/market/filter-bar'
+import { MarketGrid } from '@/features/catalog/market/market-grid'
+import { MarketStats } from '@/features/catalog/market/market-stats'
 
 /**
  * Mercado: the dense browsing surface over the same catalog the home screen
  * shows off.
  *
  * It deliberately shares the whole data layer with `/` — same endpoint, same
- * query, same URL-state helpers — and differs only in presentation. There is
- * no second catalog API, no parallel hook, and no duplicated filter logic.
+ * query, same URL-state helpers — and differs only in presentation: filters
+ * sit in a horizontal bar instead of a 310px sidebar, the freed width buys a
+ * fourth column of results, and a stats strip plus a removable-chip row make
+ * the current slice of the market legible at a glance.
  */
 export const Route = createFileRoute('/mercado')({
   validateSearch: catalogSearchSchema,
@@ -43,6 +48,7 @@ export const Route = createFileRoute('/mercado')({
 function MarketPage() {
   const search = resolveSearch(Route.useSearch())
   const navigate = useNavigate({ from: '/mercado' })
+  const href = useRouterState({ select: (state) => state.location.href })
 
   const catalog = useCatalogQuery(search)
   const facets = useFacetsQuery(search)
@@ -54,6 +60,7 @@ function MarketPage() {
     [navigate],
   )
 
+  /** Any filter change resets pagination; see `withFilterChange`. */
   const changeFilter = useCallback(
     (change: Partial<ResolvedCatalogSearch>) =>
       applySearch(withFilterChange(search, change)),
@@ -68,11 +75,18 @@ function MarketPage() {
     [applySearch, search],
   )
 
+  const clearFilters = useCallback(() => applySearch(EMPTY_SEARCH), [applySearch])
+
+  /** Favouriting needs a session; send the visitor back here afterwards. */
+  const requireAuth = useCallback(() => {
+    void navigate({ to: '/entrar', search: { redirect: href } })
+  }, [navigate, href])
+
   const hasFilters = hasActiveFilters(search)
   const meta = catalog.data?.meta
 
   return (
-    <div className="mx-auto flex w-full max-w-shell flex-col gap-8 px-5 py-6 lg:py-8">
+    <div className="mx-auto flex w-full max-w-shell flex-col gap-6 px-5 py-6 lg:py-8">
       <div className="flex flex-col gap-2">
         <h1 className="text-body-2xl font-bold text-foreground uppercase lg:text-[34px]">
           Mercado
@@ -83,63 +97,50 @@ function MarketPage() {
         </p>
       </div>
 
-      <CatalogSearchField
-        id="market-search-mobile"
-        value={search.q}
-        onSubmit={(value) => changeFilter({ q: value })}
-        className="lg:hidden"
+      <MarketStats
+        total={meta?.total}
+        facets={facets.data}
+        isLoading={facets.isPending}
       />
 
-      <section id="resultados" className="scroll-mt-24">
-        <h2 className="sr-only">Resultados do mercado</h2>
+      <MarketFilterBar
+        search={search}
+        facets={facets.data}
+        isLoading={facets.isPending}
+        onChange={changeFilter}
+      />
 
-        <div className="grid gap-8 lg:grid-cols-[310px_1fr]">
-          <div className="hidden flex-col gap-6 lg:flex">
-            <CatalogSearchField
-              id="market-search-desktop"
-              value={search.q}
-              onSubmit={(value) => changeFilter({ q: value })}
-            />
-            <FiltersPanel
-              search={search}
-              facets={facets.data}
-              isLoading={facets.isPending}
-              onChange={changeFilter}
-            />
-          </div>
+      <ActiveFilterChips
+        search={search}
+        onChange={changeFilter}
+        onClearAll={clearFilters}
+      />
 
-          <div className="flex min-w-0 flex-col gap-6">
-            <div className="flex items-center gap-3 lg:hidden">
-              <MobileFilters
-                search={search}
-                facets={facets.data}
-                isLoading={facets.isPending}
-                onChange={changeFilter}
-              />
-            </div>
+      <section id="resultados" className="flex scroll-mt-24 flex-col gap-6">
+        <h2 className="sr-only">Resultados</h2>
 
-            <CatalogToolbar search={search} onChange={changeFilter} />
+        <CatalogToolbar search={search} onChange={changeFilter} />
 
-            <CatalogGrid
-              nfts={catalog.data?.data ?? []}
-              isPending={catalog.isPending}
-              isFetching={catalog.isFetching && !catalog.isPending}
-              error={catalog.error}
-              onRetry={() => void catalog.refetch()}
-              onClearFilters={() => applySearch({} as CatalogSearch)}
-              hasFilters={hasFilters}
-            />
+        <MarketGrid
+          nfts={catalog.data?.data ?? []}
+          isPending={catalog.isPending}
+          isFetching={catalog.isFetching && !catalog.isPending}
+          error={catalog.error}
+          skeletonCount={DEFAULT_PAGE_SIZE}
+          onRetry={() => void catalog.refetch()}
+          onClearFilters={clearFilters}
+          hasFilters={hasFilters}
+          onRequireAuth={requireAuth}
+        />
 
-            {meta && (
-              <CatalogPagination
-                page={meta.page}
-                totalPages={meta.totalPages}
-                total={meta.total}
-                onChange={changePage}
-              />
-            )}
-          </div>
-        </div>
+        {meta && (
+          <CatalogPagination
+            page={meta.page}
+            totalPages={meta.totalPages}
+            total={meta.total}
+            onChange={changePage}
+          />
+        )}
       </section>
     </div>
   )

@@ -6,6 +6,7 @@ import { useCatalogQuery, useFacetsQuery } from '@/features/catalog/queries'
 import {
   buildSearch,
   catalogSearchSchema,
+  EMPTY_SEARCH,
   hasActiveFilters,
   resolveSearch,
   toApiParams,
@@ -98,6 +99,7 @@ function HomePage() {
               onSubmit={(value) => changeFilter({ q: value })}
             />
             <FiltersPanel
+              idPrefix="catalog-desktop"
               search={search}
               facets={facets.data}
               isLoading={facets.isPending}
@@ -113,6 +115,7 @@ function HomePage() {
           <div className="flex min-w-0 flex-col gap-6">
             <div className="flex items-center gap-3 lg:hidden">
               <MobileFilters
+                idPrefix="catalog-mobile"
                 search={search}
                 facets={facets.data}
                 isLoading={facets.isPending}
@@ -128,7 +131,7 @@ function HomePage() {
               isFetching={catalog.isFetching && !catalog.isPending}
               error={catalog.error}
               onRetry={() => void catalog.refetch()}
-              onClearFilters={() => applySearch({} as CatalogSearch)}
+              onClearFilters={() => applySearch(EMPTY_SEARCH)}
               hasFilters={hasFilters}
             />
 

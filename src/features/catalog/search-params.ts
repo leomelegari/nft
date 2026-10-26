@@ -59,6 +59,16 @@ export const catalogSearchSchema = z.object({
 /** What the URL carries. Every field is optional. */
 export type CatalogSearch = z.infer<typeof catalogSearchSchema>
 
+/**
+ * "Nothing selected" — the canonical cleared state, which is a bare path.
+ *
+ * The cast is needed because `csv()` transforms make the inferred *output*
+ * type's array fields required (as `T[] | undefined`), while the URL itself is
+ * allowed to omit them entirely. An empty object is exactly what the router
+ * should receive, so this is asserted once here rather than at each call site.
+ */
+export const EMPTY_SEARCH = {} as CatalogSearch
+
 /** The same state with defaults applied, which is what the UI reads. */
 export interface ResolvedCatalogSearch {
   q: string

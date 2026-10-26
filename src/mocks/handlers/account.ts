@@ -74,6 +74,29 @@ export const accountHandlers = [
     }),
   ),
 
+  /**
+   * Avatar removal.
+   *
+   * `avatar` is nullable on the user, and the design offers "Remover" next to
+   * "Alterar", so clearing it needs a route of its own: the PUT above only
+   * accepts a data URL and the profile PATCH does not touch the avatar.
+   */
+  http.delete(
+    '/api/profile/avatar',
+    handler(({ request }) => {
+      const { user } = requireAuth(request)
+
+      const updated = mutateDb((draft) => {
+        const target = draft.users.find((item) => item.id === user.id)
+        if (target) target.avatar = null
+        return target
+      })
+
+      if (!updated) fail('NOT_FOUND', 'Conta não encontrada.')
+      return HttpResponse.json(toPublicUser(updated))
+    }),
+  ),
+
   http.post(
     '/api/profile/password',
     handler(async ({ request }) => {

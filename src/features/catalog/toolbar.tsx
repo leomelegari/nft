@@ -77,7 +77,7 @@ export function CatalogToolbar({
           aria-labelledby="catalog-sort-hint"
           value={search.sort}
           onChange={(event) => onChange({ sort: event.target.value as NftSort })}
-          className="h-9 min-w-0 max-w-[14rem] rounded-md border border-border-soft bg-secondary px-2.5 text-body-md text-foreground focus-visible:outline-ring"
+          className="h-9 max-w-[14rem] min-w-0 rounded-md border border-border-soft bg-secondary px-2.5 text-body-md text-foreground focus-visible:outline-ring"
         >
           {NFT_SORTS.map((sort) => (
             <option key={sort} value={sort}>

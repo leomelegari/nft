@@ -69,7 +69,12 @@ export function CatalogPagination({
                 aria-label="Próxima página"
                 className="flex size-9 items-center justify-center rounded-md border border-border-soft text-text-secondary transition-colors hover:border-primary hover:text-foreground focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-40"
               >
-                <svg viewBox="0 0 18 18" className="size-4" fill="none" aria-hidden="true">
+                <svg
+                  viewBox="0 0 18 18"
+                  className="size-4"
+                  fill="none"
+                  aria-hidden="true"
+                >
                   <path
                     d="m6.75 4 5 5-5 5"
                     stroke="currentColor"

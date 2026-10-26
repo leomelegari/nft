@@ -266,6 +266,13 @@ comportamento em telas reais.
 | Filtros de coleção e rede | Seleção comunicada apenas por cor | Checkboxes reais: operáveis por teclado, com estado anunciado; a cor permanece como indicador adicional |
 | Faixa de preço | Slider de duas alças sem rótulos acessíveis | Dois campos numéricos rotulados mais o botão "Aplicar" do próprio design |
 
+| Botão "Favoritar" (detalhe) | Transbordava a borda direita do painel | Grupo de ações com quebra de linha; ambos os botões cabem |
+| Stepper de quantidade | Controles desenhados como elipses de 33×49,5 | Círculos de 36px, com estado desabilitado nos limites |
+| Seletor de edição | Pills estilizadas, sem semântica | Radiogroup real; edições esgotadas ficam desabilitadas e visíveis, não ocultas |
+| Miniaturas da galeria | Seleção apenas por cor de borda | Tablist com navegação por teclado e estado anunciado |
+| Avaliação em estrelas | Cinco gráficos sem rótulo | Uma imagem rotulada ("4,6 de 5 estrelas") |
+| Divisor do painel de detalhe | Largura fixa de 573px dentro de coluna flexível | Largura total da coluna |
+
 Correções posteriores continuam sendo registradas nesta tabela.
 
 ### Navegação mobile

@@ -18,8 +18,22 @@ function hashPayload(value: unknown): string {
   return (hash >>> 0).toString(16)
 }
 
+/**
+ * Simulated transaction reference.
+ *
+ * Shaped like a real 32-byte hash so the receipt looks plausible, derived from
+ * a counter so it stays deterministic across runs — the visual regression
+ * baselines include this screen.
+ */
 function simulatedTxReference(): string {
-  return `0x${nextId('tx').replace(/\D/g, '').padEnd(40, '0').slice(0, 40)}`
+  const seed = Number(nextId('tx').replace(/\D/g, ''))
+  let state = (seed * 2654435761) >>> 0
+  let hex = ''
+  while (hex.length < 64) {
+    state = (Math.imul(state ^ (state >>> 15), 2246822507) ^ 0x9e3779b9) >>> 0
+    hex += state.toString(16).padStart(8, '0')
+  }
+  return `0x${hex.slice(0, 64)}`
 }
 
 /**

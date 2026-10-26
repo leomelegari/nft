@@ -1,14 +1,8 @@
 import { NETWORKS, NETWORK_LABELS, COLLECTION_LABELS } from '@/entities/nft'
 import type { CollectionSlug, Network, NftFacets } from '@/entities/nft'
 import type { ResolvedCatalogSearch } from '@/features/catalog/search-params'
-import {
-  FilterCheckboxRow,
-  PriceRangeFields,
-} from '@/features/catalog/filter-controls'
-import {
-  SORTED_COLLECTION_SLUGS,
-  toggleValue,
-} from '@/features/catalog/filter-options'
+import { FilterCheckboxRow, PriceRangeFields } from '@/features/catalog/filter-controls'
+import { SORTED_COLLECTION_SLUGS, toggleValue } from '@/features/catalog/filter-options'
 
 /**
  * Sidebar filters: collections, price range and networks.

@@ -71,11 +71,11 @@ individuais retornam o objeto diretamente.
 
 ### NFTs
 
-| Método | Rota           | Descrição                                                                                |
-| ------ | -------------- | ---------------------------------------------------------------------------------------- |
+| Método | Rota           | Descrição                                                                                                |
+| ------ | -------------- | -------------------------------------------------------------------------------------------------------- |
 | `GET`  | `/nfts`        | `q`, `collection`, `network`, `minPrice`, `maxPrice`, `tab`, `sort`, `availability`, `page`, `pageSize`. |
-| `GET`  | `/nfts/facets` | Contagens por coleção/rede e faixa de preço.                                             |
-| `GET`  | `/nfts/:slug`  | Detalhe. `404` quando inexistente.                                                       |
+| `GET`  | `/nfts/facets` | Contagens por coleção/rede e faixa de preço.                                                             |
+| `GET`  | `/nfts/:slug`  | Detalhe. `404` quando inexistente.                                                                       |
 
 As facetas são calculadas sobre o resultado da busca textual **ignorando** as
 seleções de coleção e rede, para que escolher uma coleção não zere as demais
@@ -327,7 +327,7 @@ uma.
 
 O campo de busca consulta enquanto o usuário digita, nas duas telas, com
 debounce de 300ms. A parte difícil já existia: os params entram na `queryKey`,
-então uma resposta atrasada de um termo superado vai para a *própria* entrada de
+então uma resposta atrasada de um termo superado vai para a _própria_ entrada de
 cache e nunca é renderizada, o `signal` aborta a requisição em voo e o
 `keepPreviousData` mantém o resultado anterior visível. Buscar por tecla não
 introduz corrida nem flicker.
@@ -370,7 +370,7 @@ entram "Bio" e "Localização": são o restante do perfil que a API expõe, e se
 eles a tela não conseguiria editar metade dele.
 
 **Dois botões "Salvar".** O Figma põe um único botão ao pé da tela, abaixo dos
-campos de perfil *e* do bloco de senha. São operações distintas em endpoints
+campos de perfil _e_ do bloco de senha. São operações distintas em endpoints
 distintos, e um botão só teria de responder "o perfil salvou mas a senha atual
 estava errada" — um estado sem boa mensagem. Cada bloco envia o seu, e trocar a
 senha continua sendo um ato deliberado em vez de efeito colateral de editar uma

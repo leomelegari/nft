@@ -10,6 +10,7 @@ import { MarketFilterBar } from '@/features/catalog/market/filter-bar'
 import { MarketOptions, MarketViewToggle } from '@/features/catalog/market/market-options'
 import { MarketResults } from '@/features/catalog/market/market-results'
 import { MarketStats } from '@/features/catalog/market/market-stats'
+import { MarketPending } from '@/features/catalog/catalog-pending'
 import {
   EMPTY_MARKET_SEARCH,
   buildMarketSearch,
@@ -52,6 +53,7 @@ export const Route = createFileRoute('/mercado')({
       queryFn: ({ signal }) => fetchNfts(params, signal),
     })
   },
+  pendingComponent: MarketPending,
   component: MarketPage,
 })
 
@@ -107,10 +109,7 @@ function MarketPage() {
     [applySearch, search],
   )
 
-  const clearFilters = useCallback(
-    () => applySearch(EMPTY_MARKET_SEARCH),
-    [applySearch],
-  )
+  const clearFilters = useCallback(() => applySearch(EMPTY_MARKET_SEARCH), [applySearch])
 
   /** Favouriting needs a session; send the visitor back here afterwards. */
   const requireAuth = useCallback(() => {
@@ -196,10 +195,10 @@ function hasMarketFilters(search: ResolvedMarketSearch): boolean {
   return (
     Boolean(
       search.q ||
-        search.collection.length ||
-        search.network.length ||
-        search.minPrice ||
-        search.maxPrice,
+      search.collection.length ||
+      search.network.length ||
+      search.minPrice ||
+      search.maxPrice,
     ) ||
     search.tab !== 'all' ||
     search.availability !== 'all'

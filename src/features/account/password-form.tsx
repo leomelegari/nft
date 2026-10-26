@@ -59,11 +59,7 @@ export function PasswordForm() {
       <FormError message={form.formError} />
 
       <div className="flex max-w-[417px] flex-col gap-5">
-        <FormField
-          label="Senha atual"
-          required
-          error={form.fieldErrors.currentPassword}
-        >
+        <FormField label="Senha atual" required error={form.fieldErrors.currentPassword}>
           {(props) => (
             <PasswordInput
               {...props}

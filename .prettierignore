@@ -6,3 +6,12 @@ lighthouse-reports
 public/mockServiceWorker.js
 src/routeTree.gen.ts
 package-lock.json
+
+# Audit and test artefacts: written by tooling, not hand-edited
+lighthouse/reports
+lighthouse/RESULTS.md
+e2e/report
+e2e/.artifacts
+e2e/**/*-snapshots
+.claude
+.tanstack

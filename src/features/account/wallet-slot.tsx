@@ -95,11 +95,7 @@ export function WalletSlot({
             }}
           />
 
-          <p
-            role="status"
-            aria-live="polite"
-            className="mt-3 text-body-md text-success"
-          >
+          <p role="status" aria-live="polite" className="mt-3 text-body-md text-success">
             {saved && 'Carteira salva'}
           </p>
         </div>

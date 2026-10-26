@@ -8,6 +8,13 @@ import { useOwnerKey } from '@/features/auth/queries'
 import { requestQuote } from '@/features/cart/api'
 import { createOrder } from '@/features/orders/api'
 
+/** What the payment screen hands over when the user confirms. */
+export interface CheckoutCommand {
+  collector: CollectorInput
+  walletId: string
+  network: Order['wallet']['network']
+}
+
 export type CheckoutBlock =
   | { kind: 'none' }
   /** The quote moved between review and submit; the user must re-confirm. */
@@ -63,11 +70,7 @@ export function useCheckout(couponCode: string | undefined) {
   }, [])
 
   const mutation = useMutation({
-    mutationFn: async (input: {
-      collector: CollectorInput
-      walletId: string
-      network: Order['wallet']['network']
-    }): Promise<Order> => {
+    mutationFn: async (input: CheckoutCommand): Promise<Order> => {
       // Recovery path: a request already went out under this key, so resend it
       // byte for byte and let the server replay the original order.
       if (inFlightPayload.current) {
@@ -147,6 +150,33 @@ export function useCheckout(couponCode: string | undefined) {
     },
   })
 
+  /**
+   * Synchronous guard against a repeated click.
+   *
+   * `isSubmitting` disables the button, but it is React state: three clicks
+   * dispatched in the same tick all read it as `false` and all reach
+   * `mutate`, which React Query happily runs three times. Verified before the
+   * guard: a triple click produced three `POST /orders`, two rejected with
+   * 409 and one creating the order, while the screen stayed on the payment
+   * page with no feedback at all. A ref is the only state that is already
+   * updated for the second click of the same tick.
+   */
+  const submitting = useRef(false)
+
+  const submit = useCallback(
+    (input: CheckoutCommand) => {
+      if (submitting.current) return
+      submitting.current = true
+
+      mutation.mutate(input, {
+        onSettled: () => {
+          submitting.current = false
+        },
+      })
+    },
+    [mutation],
+  )
+
   /** Accepts the changed numbers so the next submit is allowed through. */
   const acknowledge = useCallback(() => {
     if (block.kind === 'quote-stale') {
@@ -156,7 +186,7 @@ export function useCheckout(couponCode: string | undefined) {
   }, [block])
 
   return {
-    submit: mutation.mutate,
+    submit,
     isSubmitting: mutation.isPending,
     order: mutation.data,
     block,

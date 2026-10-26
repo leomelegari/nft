@@ -10,9 +10,73 @@
       name="description"
       content="Kurio é um marketplace de NFTs com curadoria de arte digital: descubra coleções, acompanhe lançamentos e compre com carteiras conectadas."
     />
+    <!--
+      Critical shell styles, inlined so the first paint needs no stylesheet.
+      Kept to the few tokens the boot shell uses; the real theme arrives with
+      the app bundle.
+    -->
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      html,
+      body {
+        margin: 0;
+        background: #140d0a;
+        color: #f5f1eb;
+      }
+      body {
+        font-family: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      .boot {
+        min-height: 100dvh;
+      }
+      .boot-header {
+        display: flex;
+        align-items: center;
+        height: 64px;
+        padding: 0 20px;
+        border-bottom: 1px solid #3f2319;
+      }
+      .boot-wordmark {
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 1.4px;
+      }
+      .boot-main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px 20px;
+      }
+      .boot-block {
+        background: #241612;
+        border-radius: 16px;
+        height: 320px;
+      }
+      @media (min-width: 1024px) {
+        .boot-header {
+          height: 72px;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <!--
+      Boot shell.
+      The mock service worker has to be intercepting before the first query
+      fires, so the bundle cannot render anything until it has started — on a
+      throttled connection that was three seconds of blank page. This is the
+      real header, painted from the document itself, and React replaces it the
+      moment it mounts because `createRoot().render()` clears the container.
+    -->
+    <div id="root">
+      <div class="boot">
+        <header class="boot-header"><span class="boot-wordmark">KURIO</span></header>
+        <main class="boot-main">
+          <div class="boot-block"></div>
+        </main>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

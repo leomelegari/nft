@@ -1,9 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import {
-  COLLECTION_LABELS,
-  NETWORK_LABELS,
-  type NftSummary,
-} from '@/entities/nft'
+import { COLLECTION_LABELS, NETWORK_LABELS, type NftSummary } from '@/entities/nft'
 import { formatEth } from '@/shared/money'
 import { Artwork } from '@/shared/ui/artwork'
 import { cn } from '@/shared/lib/utils'

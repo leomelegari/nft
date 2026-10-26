@@ -36,7 +36,19 @@ export function CatalogPagination({
 
   return (
     <div className="flex flex-col-reverse items-center justify-between gap-3 sm:flex-row">
-      <p className="text-caption-lg whitespace-nowrap text-text-secondary tabular-nums">
+      {/*
+        Announced politely: with search-as-you-type the list changes without
+        the user doing anything a screen reader would narrate on its own, so
+        the count is the only signal that the results moved. This element is
+        always mounted, which is what makes it a reliable live region — a
+        region inserted at the same moment its content appears is frequently
+        not announced at all.
+      */}
+      <p
+        role="status"
+        aria-live="polite"
+        className="text-caption-lg whitespace-nowrap text-text-secondary tabular-nums"
+      >
         {total} {total === 1 ? 'resultado' : 'resultados'}
       </p>
 

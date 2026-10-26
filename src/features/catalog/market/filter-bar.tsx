@@ -36,6 +36,7 @@ export function MarketFilterBar({
   facets,
   isLoading,
   onChange,
+  onSearch,
   trailing,
 }: {
   /** Owned by the route, which also binds the "/" shortcut to it. */
@@ -44,6 +45,7 @@ export function MarketFilterBar({
   facets: NftFacets | undefined
   isLoading: boolean
   onChange: (change: Partial<ResolvedCatalogSearch>) => void
+  onSearch: (value: string, options: { replace: boolean }) => void
   /** Controls that belong on the bar but are not filters, e.g. the view toggle. */
   trailing?: React.ReactNode
 }) {
@@ -55,7 +57,7 @@ export function MarketFilterBar({
         <CatalogSearchField
           id={searchFieldId}
           value={search.q}
-          onSubmit={(value) => onChange({ q: value })}
+          onSearch={onSearch}
         />
       </div>
 

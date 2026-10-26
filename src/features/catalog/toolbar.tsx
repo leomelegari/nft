@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import {
   NFT_SORTS,
   NFT_SORT_LABELS,
@@ -6,6 +7,7 @@ import {
   type NftSort,
 } from '@/entities/nft'
 import type { ResolvedCatalogSearch } from '@/features/catalog/search-params'
+import { useDebouncedValue } from '@/shared/lib/use-debounced-value'
 import { cn } from '@/shared/lib/utils'
 
 /**
@@ -90,10 +92,13 @@ export function CatalogToolbar({
   )
 }
 
+/** How long the field waits after the last keystroke before searching. */
+const SEARCH_DEBOUNCE_MS = 300
+
 export function CatalogSearchField({
   id,
   value,
-  onSubmit,
+  onSearch,
   className,
 }: {
   /**
@@ -103,17 +108,53 @@ export function CatalogSearchField({
    */
   id: string
   value: string
-  onSubmit: (value: string) => void
+  /**
+   * `replace` is true while the user is typing, so a search term does not
+   * leave one history entry per keystroke and the back button stays usable.
+   * Submitting with Enter pushes a real entry: that is the user marking a
+   * search worth returning to.
+   */
+  onSearch: (value: string, options: { replace: boolean }) => void
   className?: string
 }) {
+  /** What the input shows; the user owns it while typing. */
+  const [draft, setDraft] = useState(value)
+  /** The last `value` this component reacted to. */
+  const [lastSynced, setLastSynced] = useState(value)
+
+  const debounced = useDebouncedValue(draft, SEARCH_DEBOUNCE_MS)
+
+  // Adjusting state during render rather than in an effect — the documented
+  // way to react to a prop change. The field must not remount: it previously
+  // used `key={value}`, which was harmless when the value only changed on
+  // submit but would destroy focus and caret position on every keystroke now.
+  if (value !== lastSynced) {
+    setLastSynced(value)
+    // Adopt only changes that came from somewhere else — cleared filters, or
+    // back/forward — never this field's own echo returning through the URL.
+    // The echo always equals the debounced value that caused it, so anything
+    // typed while it was in flight survives.
+    if (value !== debounced) setDraft(value)
+  }
+
+  useEffect(() => {
+    // Still settling: pushing a stale value here would undo a submit that
+    // beat the timer.
+    if (debounced !== draft) return
+    // Already applied, which is also the loop guard — `onSearch` gets a new
+    // identity on every navigation, including the one it just caused.
+    if (debounced === value) return
+
+    onSearch(debounced, { replace: true })
+  }, [debounced, draft, value, onSearch])
+
   return (
     <form
       role="search"
       className={cn('relative w-full', className)}
       onSubmit={(event) => {
         event.preventDefault()
-        const data = new FormData(event.currentTarget)
-        onSubmit(String(data.get('q') ?? ''))
+        onSearch(draft, { replace: false })
       }}
     >
       <label htmlFor={id} className="sr-only">
@@ -123,8 +164,8 @@ export function CatalogSearchField({
         id={id}
         name="q"
         type="search"
-        defaultValue={value}
-        key={value}
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
         placeholder="Explorar coleções"
         className="h-12 w-full rounded-xl border border-border-soft bg-card pr-4 pl-11 text-body-lg text-foreground placeholder:text-brand-secondary focus-visible:outline-ring"
       />

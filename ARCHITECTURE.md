@@ -323,6 +323,35 @@ endpoint, a mesma query e os mesmos utilitários de URL. Os controles de filtro
 (`catalog-states.tsx`) são compartilhados; só o layout dos resultados é de cada
 uma.
 
+### Busca ao vivo
+
+O campo de busca consulta enquanto o usuário digita, nas duas telas, com
+debounce de 300ms. A parte difícil já existia: os params entram na `queryKey`,
+então uma resposta atrasada de um termo superado vai para a *própria* entrada de
+cache e nunca é renderizada, o `signal` aborta a requisição em voo e o
+`keepPreviousData` mantém o resultado anterior visível. Buscar por tecla não
+introduz corrida nem flicker.
+
+Três decisões sustentam o campo:
+
+- **Digitar usa `replace`, Enter faz `push`.** Uma entrada de histórico por
+  tecla tornaria o botão "voltar" inútil. Enter é o usuário marcando uma busca
+  à qual vale voltar.
+- **O input deixou de ter `key={value}`.** Aquele truque remontava o campo para
+  adotar mudanças externas — inofensivo quando o valor só mudava no submit,
+  destruidor de foco e de posição do cursor a cada tecla agora. No lugar, o
+  rascunho é estado local e mudanças externas são adotadas ajustando o estado
+  durante o render.
+- **O eco não sobrescreve o que está sendo digitado.** O valor que volta pela
+  URL é sempre igual ao valor debounced que o causou; só se diferir dele é que
+  veio de fora (limpar filtros, voltar/avançar) e deve substituir o rascunho.
+
+A contagem de resultados é uma live region polida (`role="status"`). Com busca
+ao vivo a lista muda sem nenhuma ação que o leitor de tela narre sozinho, e a
+contagem é o único sinal de que o resultado se moveu. Ela fica sempre montada
+de propósito: uma região inserida no mesmo instante em que o conteúdo aparece
+frequentemente não é anunciada.
+
 ### Navegação mobile
 
 O frame mobile usa uma barra de abas inferior com um botão flutuante central

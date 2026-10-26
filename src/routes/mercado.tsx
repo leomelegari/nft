@@ -71,17 +71,26 @@ function MarketPage() {
   })
 
   const applySearch = useCallback(
-    (next: MarketSearch) => {
-      void navigate({ search: next as never, resetScroll: false })
+    (next: MarketSearch, { replace = false }: { replace?: boolean } = {}) => {
+      void navigate({ search: next as never, resetScroll: false, replace })
     },
     [navigate],
   )
 
   /** Any filter change resets pagination; see `withMarketFilterChange`. */
   const changeFilter = useCallback(
-    (change: Partial<ResolvedMarketSearch>) =>
-      applySearch(withMarketFilterChange(search, change)),
+    (change: Partial<ResolvedMarketSearch>, options?: { replace?: boolean }) =>
+      applySearch(withMarketFilterChange(search, change), options),
     [applySearch, search],
+  )
+
+  /**
+   * Typing replaces the current history entry rather than pushing one; see
+   * `CatalogSearchField`.
+   */
+  const changeQuery = useCallback(
+    (q: string, options: { replace: boolean }) => changeFilter({ q }, options),
+    [changeFilter],
   )
 
   /** Changing the layout is not a filter change, so it keeps the page. */
@@ -134,6 +143,7 @@ function MarketPage() {
         facets={facets.data}
         isLoading={facets.isPending}
         onChange={changeFilter}
+        onSearch={changeQuery}
         trailing={<MarketViewToggle view={search.view} onChange={changeView} />}
       />
 

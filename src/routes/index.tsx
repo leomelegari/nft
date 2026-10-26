@@ -46,17 +46,26 @@ function HomePage() {
   const facets = useFacetsQuery({ q: search.q, tab: search.tab })
 
   const applySearch = useCallback(
-    (next: CatalogSearch) => {
-      void navigate({ search: next as never, resetScroll: false })
+    (next: CatalogSearch, { replace = false }: { replace?: boolean } = {}) => {
+      void navigate({ search: next as never, resetScroll: false, replace })
     },
     [navigate],
   )
 
   /** Any filter change resets pagination; see `withFilterChange`. */
   const changeFilter = useCallback(
-    (change: Partial<ResolvedCatalogSearch>) =>
-      applySearch(withFilterChange(search, change)),
+    (change: Partial<ResolvedCatalogSearch>, options?: { replace?: boolean }) =>
+      applySearch(withFilterChange(search, change), options),
     [applySearch, search],
+  )
+
+  /**
+   * Typing replaces the current history entry rather than pushing one; see
+   * `CatalogSearchField`.
+   */
+  const changeQuery = useCallback(
+    (q: string, options: { replace: boolean }) => changeFilter({ q }, options),
+    [changeFilter],
   )
 
   const changePage = useCallback(
@@ -82,7 +91,7 @@ function HomePage() {
       <CatalogSearchField
         id="catalog-search-mobile"
         value={search.q}
-        onSubmit={(value) => changeFilter({ q: value })}
+        onSearch={changeQuery}
         className="lg:hidden"
       />
 
@@ -96,7 +105,7 @@ function HomePage() {
             <CatalogSearchField
               id="catalog-search-desktop"
               value={search.q}
-              onSubmit={(value) => changeFilter({ q: value })}
+              onSearch={changeQuery}
             />
             <FiltersPanel
               idPrefix="catalog-desktop"

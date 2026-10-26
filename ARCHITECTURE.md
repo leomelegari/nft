@@ -183,8 +183,8 @@ baselines de regressão visual e as auditorias Lighthouse exigem.
 
 ### Credenciais fictícias
 
-| E-mail                        | Senha           |
-| ----------------------------- | --------------- |
+| E-mail                    | Senha           |
+| ------------------------- | --------------- |
 | `colecionador@kurio.test` | `Colecionador1` |
 | `curadora@kurio.test`     | `Curadora2026`  |
 
@@ -229,12 +229,38 @@ O seed da aleatoriedade de cenário é fixo (`21`), escolhido para que as
 primeiras ~20 amostras reflitam a taxa de falha configurada em vez de um surto
 atípico — importante porque um teste curto observa justamente essa janela.
 
-## 9. Desvios do Figma
+## 9. Desvios e correções do Figma
+
+### Nome do produto
+
+A página do Figma se chama "Marketplace de NFTs GreenMint", mas o wordmark do
+header, o do rodapé e o texto do hero ("Bem-vindo à Kurio") dizem **KURIO**. O
+nome da página não é a marca; o produto é Kurio.
+
+### Decisões de conteúdo
 
 | Item                                     | Decisão                                                                                                                                                                                                                     |
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Contagens de rede na sidebar (119/78/86) | Somam um total diferente do das coleções no próprio arquivo. As contagens de **coleção** foram reproduzidas exatamente; as de rede são derivadas dos dados reais, já que o enunciado exige que as consultas reflitam a API. |
 | Tema claro                               | O arquivo define apenas um tema escuro; não há variante clara a implementar.                                                                                                                                                |
+| Nav "Criadores" e "Aprenda"              | Destinos editoriais fora do escopo. Renderizados como texto inerte com `aria-disabled`, nunca como links que não levam a lugar nenhum.                                                                                      |
+| Links do rodapé e newsletter             | Mesma regra: presentes por fidelidade, explicitamente inertes, sem aparentar sucesso funcional.                                                                                                                             |
+
+### Correções de layout
+
+O arquivo contém imprecisões de layout que foram corrigidas na implementação.
+Cada correção preserva a composição e a identidade visual; o que muda é o
+comportamento em telas reais.
+
+| Onde                          | No Figma                                                           | Correção                                               |
+| ----------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------ |
+| Wordmark do header            | Caixa de 160×34 com `overflow: clip` e sem padding, cortando o "K" | Renderizado como texto, alinhado à coluna de conteúdo  |
+| Colunas de destaque do rodapé | Larguras desiguais (uma flexível, duas fixas em 264,667px)         | Grid de quatro trilhas iguais                          |
+| "Carteiras compatíveis"       | Título transbordava a coluna de 228px                              | Coluna dimensionada pelo conteúdo; título quebra linha |
+| Chip de carteiras             | `padding-left: 8px` e `padding-right: 0`, cortando "COINBASE"      | Padding simétrico e chips que quebram linha            |
+| Campo da newsletter           | Padding só à esquerda; o valor colidia com o botão                 | Campo reserva espaço para o botão                      |
+
+Correções posteriores continuam sendo registradas nesta tabela.
 
 ## 10. Limitações conhecidas
 

@@ -4,6 +4,7 @@ import { getDb, mutateDb, nextId } from '@/mocks/db/store'
 import { buildCart } from '@/mocks/db/cart'
 import { getScenario } from '@/mocks/scenarios'
 import { fail, handler, parseBody, requireAuth } from '@/mocks/handlers/support'
+import { emitNftUpdated, emitOrderUpdated } from '@/mocks/socket/events'
 
 /** How long an order stays `pending` before the simulation settles it. */
 export const SETTLEMENT_DELAY_MS = 2500
@@ -44,12 +45,12 @@ function simulatedTxReference(): string {
  * and this remains the reconciliation path used after a refresh or reconnect.
  */
 export function settleIfDue(orderId: string): void {
-  mutateDb((draft) => {
+  const settled = mutateDb((draft) => {
     const order = draft.orders.find((item) => item.id === orderId)
-    if (!order || order.status !== 'pending') return
+    if (!order || order.status !== 'pending') return null
 
     const elapsed = Date.now() - new Date(order.createdAt).getTime()
-    if (elapsed < SETTLEMENT_DELAY_MS) return
+    if (elapsed < SETTLEMENT_DELAY_MS) return null
 
     const outcome = getScenario().behavior.paymentOutcome
     order.status = outcome
@@ -59,7 +60,19 @@ export function settleIfDue(orderId: string): void {
         ? 'A carteira recusou a transação. Nenhum valor foi debitado.'
         : null
     order.version += 1
+
+    const session = draft.sessions.find((item) => item.userId === order.userId)
+    return { order, socketSessionId: session?.socketSessionId ?? null }
   })
+
+  if (settled) {
+    emitOrderUpdated(toWireOrder(settled.order), settled.socketSessionId)
+  }
+}
+
+/** Socket session id for a user, used to scope order events to its owner. */
+function session(userId: string): string | null {
+  return getDb().sessions.find((item) => item.userId === userId)?.socketSessionId ?? null
 }
 
 function toWireOrder(order: Order & { userId: string }): Order {
@@ -151,6 +164,8 @@ export const orderHandlers = [
         }
       }
 
+      const touchedNfts: ReturnType<typeof getDb>['nfts'] = []
+
       const order = mutateDb((draft) => {
         // Decrement stock and bump versions so connected clients see the change.
         for (const line of cart.items) {
@@ -213,6 +228,12 @@ export const orderHandlers = [
         }
 
         draft.orders.push(created)
+        touchedNfts.push(
+          ...cart.items.flatMap((line) => {
+            const nft = draft.nfts.find((item) => item.id === line.nftId)
+            return nft ? [nft] : []
+          }),
+        )
         draft.quotes = draft.quotes.filter((item) => item.ownerKey !== user.id)
         draft.idempotency.push({
           key: idempotencyKey,
@@ -224,6 +245,10 @@ export const orderHandlers = [
 
         return created
       })
+
+      // Stock moved, so every affected NFT is announced.
+      for (const nft of touchedNfts) emitNftUpdated(nft)
+      emitOrderUpdated(toWireOrder(order), user.id ? session(user.id) : null)
 
       /**
        * Timeout scenario: the order is already persisted above, so retrying

@@ -3,8 +3,9 @@
 @import '@fontsource-variable/roboto-mono/wght.css';
 
 /*
- * GreenMint design tokens — extracted from Figma
- * "Marketplace de NFTs GreenMint" (file tAmT3NyU772hVw3MGt539G).
+ * Kurio design tokens — extracted from Figma
+ * Figma file tAmT3NyU772hVw3MGt539G ("Marketplace de NFTs GreenMint" is the
+ * page name; the brand wordmark throughout the design is KURIO).
  * The design ships a single dark theme; there is no light variant in the file,
  * so the dark palette is the default and only theme. See ARCHITECTURE.md.
  */
@@ -62,7 +63,7 @@
 }
 
 /*
- * shadcn/ui semantic variables, mapped onto the GreenMint palette so every
+ * shadcn/ui semantic variables, mapped onto the Kurio palette so every
  * generated component inherits the identity without per-component overrides.
  */
 :root {

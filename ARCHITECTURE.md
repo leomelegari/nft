@@ -1,4 +1,4 @@
-# Arquitetura — GreenMint
+# Arquitetura — Kurio
 
 Decisões técnicas, contratos e limitações conhecidas da solução.
 
@@ -167,7 +167,7 @@ dados privados sem varredura manual.
 
 ### Banco simulado
 
-Banco em memória espelhado em `localStorage` (`greenmint.mock-db`), versionado
+Banco em memória espelhado em `localStorage` (`kurio.mock-db`), versionado
 por schema. `resetDb()` restaura integralmente um cenário conhecido — é o que
 cada teste Playwright chama para partir de estado isolado.
 
@@ -185,8 +185,8 @@ baselines de regressão visual e as auditorias Lighthouse exigem.
 
 | E-mail                        | Senha           |
 | ----------------------------- | --------------- |
-| `colecionador@greenmint.test` | `Colecionador1` |
-| `curadora@greenmint.test`     | `Curadora2026`  |
+| `colecionador@kurio.test` | `Colecionador1` |
+| `curadora@kurio.test`     | `Curadora2026`  |
 
 Senhas nunca são armazenadas em claro: o fixture guarda apenas um digest
 simulado (`digestPassword`), que não é um KDF real e não pretende sê-lo.

@@ -12,7 +12,7 @@ import { createRandom } from '@/mocks/db/random'
  * > `default`. The param is persisted so the selection survives client-side
  * navigation and refresh without having to re-append it to every URL.
  */
-const STORAGE_KEY = 'greenmint.mock-scenario'
+const STORAGE_KEY = 'kurio.mock-scenario'
 
 let active: Scenario | null = null
 

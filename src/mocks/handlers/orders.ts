@@ -191,7 +191,7 @@ export const orderHandlers = [
             network: wallet.network,
             address: wallet.address,
           },
-          explorerUrl: `https://explorer.simulado.greenmint.test/tx/${simulatedTxReference()}`,
+          explorerUrl: `https://explorer.simulado.kurio.test/tx/${simulatedTxReference()}`,
           declineReason: null,
           createdAt: new Date().toISOString(),
           settledAt: null,

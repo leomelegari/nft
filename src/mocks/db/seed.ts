@@ -24,8 +24,15 @@ const COLLECTION_SIZES: Record<CollectionSlug, number> = {
   utilidade: 18,
 }
 
-/** Artwork pool; fixtures cycle through it deterministically. */
-const ARTWORK_COUNT = 18
+/**
+ * The Figma file contains exactly four distinct artworks, reused across the
+ * grid, the featured banner and the detail screens. The fixtures follow the
+ * same approach and cycle through them deterministically.
+ *
+ * Paths are size-less bases: the UI appends `-500.webp` or `-900.webp` through
+ * the `Artwork` component, which is how an image CDN would be addressed.
+ */
+const ARTWORK_COUNT = 4
 
 const NAME_PREFIXES = [
   'Emerald',
@@ -113,7 +120,7 @@ function buildNfts(seed: number): MockNft[] {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '')}-${index}`
-      const artwork = `/nft/artwork-${String((index % ARTWORK_COUNT) + 1).padStart(2, '0')}.png`
+      const artwork = `/nft/artwork-${String((index % ARTWORK_COUNT) + 1).padStart(2, '0')}`
       const creator = random.pick(CREATORS)
 
       // Base price spans the 0.02 – 12.30 ETH range shown in the Figma filter.

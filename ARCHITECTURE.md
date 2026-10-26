@@ -260,7 +260,22 @@ comportamento em telas reais.
 | Chip de carteiras             | `padding-left: 8px` e `padding-right: 0`, cortando "COINBASE"      | Padding simétrico e chips que quebram linha            |
 | Campo da newsletter           | Padding só à esquerda; o valor colidia com o botão                 | Campo reserva espaço para o botão                      |
 
+| Toolbar do catálogo | Abas e ordenação colidiam; o grupo de ordenação não encolhia | Abas roláveis com `min-w-0`, grupo de ordenação encolhível. Sem a correção havia 109px de overflow horizontal em 1024px |
+| Abas do catálogo (mobile) | Três rótulos a 20px de distância, sem padding, colidindo em telas estreitas | Tablist rolável com espaçamento real |
+| Hero (mobile) | O display de 43px quebra o título em quatro linhas em 390px | Escala tipográfica responsiva: 28px no mobile, 43px no desktop |
+| Filtros de coleção e rede | Seleção comunicada apenas por cor | Checkboxes reais: operáveis por teclado, com estado anunciado; a cor permanece como indicador adicional |
+| Faixa de preço | Slider de duas alças sem rótulos acessíveis | Dois campos numéricos rotulados mais o botão "Aplicar" do próprio design |
+
 Correções posteriores continuam sendo registradas nesta tabela.
+
+### Navegação mobile
+
+O frame mobile usa uma barra de abas inferior com um botão flutuante central
+que se sobrepõe a um card do catálogo e cobre parte do conteúdo. A implementação
+usa um drawer de navegação acionado pelo header, com foco preso e devolvido ao
+gatilho. A decisão troca fidelidade por conteúdo não obstruído e por um alvo de
+navegação acessível; o botão flutuante, que não tem comportamento definido no
+enunciado, foi omitido.
 
 ## 10. Limitações conhecidas
 

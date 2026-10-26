@@ -16,6 +16,19 @@ import { SkeletonBlock } from '@/shared/ui/skeleton-primitives'
 import { cn } from '@/shared/lib/utils'
 
 /**
+ * Collection rows sorted alphabetically (pt-BR) by label for display.
+ *
+ * `COLLECTION_SLUGS` itself keeps its original order: `seed.ts` iterates it to
+ * generate the deterministic fixture catalog, and reordering the source array
+ * would shift which id gets assigned to which collection, invalidating the
+ * visual-regression baselines. Sorting is therefore done here, once, at module
+ * scope — not with a per-render sort of the canonical array.
+ */
+const SORTED_COLLECTION_SLUGS = [...COLLECTION_SLUGS].sort((a, b) =>
+  COLLECTION_LABELS[a].localeCompare(COLLECTION_LABELS[b], 'pt-BR'),
+)
+
+/**
  * Sidebar filters: collections, price range and networks.
  *
  * Collection and network rows are real checkboxes rather than the plain text of
@@ -46,7 +59,7 @@ export function FiltersPanel({
       <fieldset>
         <legend className="text-body-2xl font-bold text-foreground">Coleções</legend>
         <ul className="mt-3 px-3">
-          {COLLECTION_SLUGS.map((slug) => (
+          {SORTED_COLLECTION_SLUGS.map((slug) => (
             <li key={slug}>
               <FilterRow
                 label={COLLECTION_LABELS[slug]}

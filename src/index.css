@@ -23,6 +23,7 @@
   --color-text-primary: #f7f3ec;
   --color-text-secondary: #cfb28c;
   --color-foreground-cream: #f5f1eb;
+  --color-text-coral: #f0805f;
 
   /* Status colors (not in Figma — derived to sit in the warm palette) */
   --color-success: #7bb661;

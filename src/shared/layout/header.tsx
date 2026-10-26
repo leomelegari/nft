@@ -1,7 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import CartIcon from '@/assets/icons/cart.svg?react'
-import LogoutIcon from '@/assets/icons/logout.svg?react'
 import SearchIcon from '@/assets/icons/search.svg?react'
+import { UserMenu } from '@/features/auth/user-menu'
 import { Wordmark } from '@/shared/layout/wordmark'
 import { NAV_ITEMS, isNavItemActive } from '@/shared/layout/nav-items'
 import { cn } from '@/shared/lib/utils'
@@ -23,6 +23,7 @@ export function Header({
   onOpenMenu,
 }: HeaderProps) {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const href = useRouterState({ select: (state) => state.location.href })
 
   return (
     <header
@@ -119,17 +120,14 @@ export function Header({
               </span>
             )}
             <span className="sr-only">
-              Carrinho{cartCount > 0 ? `, ${cartCount} itens` : ', vazio'}
+              Carrinho
+              {cartCount > 0
+                ? `, ${cartCount} ${cartCount === 1 ? 'item' : 'itens'}`
+                : ', vazio'}
             </span>
           </Link>
 
-          <Link
-            to="/"
-            className="inline-flex h-[35px] items-center justify-center gap-1 rounded-md bg-primary px-4 text-body-lg font-medium text-primary-foreground transition-colors hover:bg-text-accent"
-          >
-            <LogoutIcon className="size-5" aria-hidden="true" />
-            Entrar
-          </Link>
+          <UserMenu currentHref={href} />
         </div>
       </div>
     </header>

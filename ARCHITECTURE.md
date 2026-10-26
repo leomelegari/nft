@@ -281,6 +281,10 @@ comportamento em telas reais.
 | Campo de cupom | `padding-left: 8px`, botão encostado, texto truncado | Campo e botão com espaçamento próprio |
 | Ícone de remover item | Sem rótulo acessível | `aria-label` nomeando o item removido |
 
+| Campos obrigatórios do checkout | "Código de indicação" e "Nome ENS" marcados como obrigatórios | Marcados como opcionais: ninguém sem código de indicação conseguiria comprar |
+| Seleção de carteira duplicada | "Rede", "Endereço" e "Tipo de carteira" no formulário **e** um radiogroup de carteiras no painel lateral | Uma única fonte: o radiogroup das carteiras cadastradas; a rede decorre da carteira escolhida |
+| Referência de transação | Sequência de zeros | Hash hexadecimal determinístico de 32 bytes |
+
 Correções posteriores continuam sendo registradas nesta tabela.
 
 ### Navegação mobile
@@ -336,6 +340,37 @@ backend, e não lógica de UI.
   portão de cotação desatualizada que ela existe para sustentar.
 - **O cupom vive na URL** (`/carrinho?cupom=`), então sobrevive a refresh e é
   restaurado pelo histórico junto com o carrinho.
+
+## 9.3 Checkout e idempotência
+
+A submissão segue, deliberadamente, a ordem **recotar → inspecionar → enviar**:
+
+1. Uma cotação nova é pedida imediatamente antes do envio, revalidando preço,
+   disponibilidade, cupom e taxas no último momento possível.
+2. Se essa cotação trouxer qualquer `issue`, o envio é **bloqueado** e o usuário
+   vê o que mudou. Confirmar de novo é uma ação separada e deliberada.
+3. Só uma cotação limpa é enviada, acompanhada da chave de idempotência.
+
+### A chave de idempotência e o corpo andam juntos
+
+Uma chave de idempotência só faz sentido junto com o corpo para o qual foi
+usada: o servidor trata a mesma chave com conteúdo diferente como conflito, por
+definição. Portanto **um retry após timeout reenvia a requisição idêntica** —
+recotar antes geraria um novo `quoteId` e transformaria a recuperação em
+`IDEMPOTENCY_CONFLICT` em vez de devolver o pedido já criado.
+
+O payload em voo é descartado apenas em falhas que um retry não resolve (regra
+de negócio); falhas de rede e timeout preservam a tentativa.
+
+### Verificado
+
+| Cenário                                 | Resultado                                                                                                     |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Preço muda entre revisão e envio        | Bloqueado, `issue` listado, **0 pedidos criados**; após "Revisei os novos valores", confirma e cria 1         |
+| 3 cliques rápidos em "Confirmar compra" | **1 pedido**                                                                                                  |
+| Pagamento recusado                      | Estado `declined` com motivo                                                                                  |
+| Timeout após criar o pedido             | Pedido persistido; o timeout do Axios reabilita o botão; retry recupera **o mesmo pedido**, total permanece 1 |
+| Recibo após mudança no catálogo         | Valores inalterados — o recibo é um snapshot                                                                  |
 
 ## 10. Limitações conhecidas
 

@@ -18,11 +18,14 @@ import {
  * apart. Focus is trapped by the dialog and returned to the trigger on close.
  */
 export function MobileFilters({
+  idPrefix,
   search,
   facets,
   isLoading,
   onChange,
 }: {
+  /** Namespaces the panel's input ids; see `FiltersPanel`. */
+  idPrefix: string
   search: ResolvedCatalogSearch
   facets: NftFacets | undefined
   isLoading: boolean
@@ -70,6 +73,7 @@ export function MobileFilters({
           </DialogHeader>
 
           <FiltersPanel
+            idPrefix={idPrefix}
             search={search}
             facets={facets}
             isLoading={isLoading}

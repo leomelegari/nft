@@ -4,7 +4,6 @@ import SearchIcon from '@/assets/icons/search.svg?react'
 import { UserMenu } from '@/features/auth/user-menu'
 import { Wordmark } from '@/shared/layout/wordmark'
 import { NAV_ITEMS, isNavItemActive } from '@/shared/layout/nav-items'
-import { useCatalogSectionActive } from '@/shared/layout/use-catalog-section-active'
 import { cn } from '@/shared/lib/utils'
 
 interface HeaderProps {
@@ -25,7 +24,6 @@ export function Header({
 }: HeaderProps) {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const href = useRouterState({ select: (state) => state.location.href })
-  const catalogSectionActive = useCatalogSectionActive()
 
   return (
     <header
@@ -51,7 +49,7 @@ export function Header({
         <nav aria-label="Navegação principal" className="hidden lg:block">
           <ul className="flex items-center gap-10">
             {NAV_ITEMS.map((item) => {
-              const active = isNavItemActive(item, pathname, catalogSectionActive)
+              const active = isNavItemActive(item, pathname)
 
               if (!item.available) {
                 return (
@@ -73,30 +71,14 @@ export function Header({
 
               return (
                 <li key={item.label} className="relative">
-                  {/*
-                    Known limitation: TanStack Router's Link forces its own
-                    aria-current="page" whenever its own pathname+hash match
-                    succeeds, overriding the aria-current prop below whenever
-                    that happens — and by default it ignores hash, so both
-                    Início and Mercado (sharing to="/") can be marked current
-                    simultaneously during a scroll-only visit. The visual
-                    active state (the font-bold/accent/underline below) is
-                    independent of the router's own match and is correct in
-                    every scenario; see use-catalog-section-active.ts for why
-                    a hash-sync fix for the aria-current duplication was
-                    attempted and reverted (it raced with Mercado's own click
-                    navigation).
-                  */}
                   <Link
-                    to="/"
-                    {...(item.hash ? { hash: item.hash } : {})}
+                    to={item.to}
                     className={cn(
                       'block rounded-sm pb-1 text-body-lg transition-colors',
                       active
                         ? 'font-bold text-text-accent'
                         : 'text-foreground hover:text-text-accent',
                     )}
-                    aria-current={active ? 'page' : undefined}
                   >
                     {item.label}
                   </Link>

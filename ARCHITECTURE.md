@@ -73,13 +73,19 @@ individuais retornam o objeto diretamente.
 
 | Método | Rota           | Descrição                                                                                |
 | ------ | -------------- | ---------------------------------------------------------------------------------------- |
-| `GET`  | `/nfts`        | `q`, `collection`, `network`, `minPrice`, `maxPrice`, `tab`, `sort`, `page`, `pageSize`. |
+| `GET`  | `/nfts`        | `q`, `collection`, `network`, `minPrice`, `maxPrice`, `tab`, `sort`, `availability`, `page`, `pageSize`. |
 | `GET`  | `/nfts/facets` | Contagens por coleção/rede e faixa de preço.                                             |
 | `GET`  | `/nfts/:slug`  | Detalhe. `404` quando inexistente.                                                       |
 
 As facetas são calculadas sobre o resultado da busca textual **ignorando** as
 seleções de coleção e rede, para que escolher uma coleção não zere as demais
 linhas da sidebar.
+
+`availability=available` esconde os itens esgotados. É filtro de servidor por
+necessidade, não por conveniência: filtrar a página já renderizada no cliente
+deixaria `meta.total` e `meta.totalPages` descrevendo um conjunto que o usuário
+não vê. O padrão é `all` — um item esgotado continua fazendo parte do histórico
+do mercado, e o card o marca como tal.
 
 ### Favoritos, carrinho, cotação, pedidos, perfil, carteiras
 
@@ -283,6 +289,40 @@ comportamento em telas reais.
 
 Correções posteriores continuam sendo registradas nesta tabela.
 
+### "Mercado" como rota própria
+
+As notas de componente do Figma dizem que "Mercado" é o item ativo nas telas de
+detalhe, carrinho, pagamento e confirmação — ou seja, ele responde pelo fluxo de
+compra inteiro. Inicialmente isso foi lido como "o catálogo é a seção da home",
+e os dois itens dividiam a URL `/`.
+
+Dividir uma URL entre dois itens de nav tem um custo estrutural: qual deles está
+ativo deixa de ser derivável da rota e passa a depender de um scrollspy, e o
+`<Link>` do TanStack Router marca os dois com `aria-current="page"`, porque o
+casamento dele ignora a hash.
+
+Hoje "Mercado" é `/mercado`: uma tela sobre os **mesmos** dados do catálogo, com
+outra apresentação. O item ativo voltou a ser um prefix match simples e o
+scrollspy foi removido.
+
+A home continua sendo a vitrine (hero + catálogo em 2/3 colunas, filtros numa
+sidebar de 310px). O Mercado é a superfície de garimpo: filtros numa barra
+horizontal de popovers, a largura liberada compra uma quarta coluna, uma faixa
+de indicadores resume o recorte atual e uma linha de chips removíveis diz quais
+filtros estão ativos — sem ela, os popovers fechados esconderiam o motivo de o
+resultado estar estreitado.
+
+Três escolhas são do leitor, todas em search params (`view`, `pageSize`,
+`availability`), pelo mesmo motivo dos filtros: sobrevivem a refresh, são
+restauradas por voltar/avançar e viajam num link compartilhado. É isso que
+torna o botão "copiar link" útil — o endereço já descreve a tela exata.
+
+Camada de dados compartilhada, apresentação própria: as duas telas usam o mesmo
+endpoint, a mesma query e os mesmos utilitários de URL. Os controles de filtro
+(`filter-controls.tsx`) e os estados de erro/vazio/atualização
+(`catalog-states.tsx`) são compartilhados; só o layout dos resultados é de cada
+uma.
+
 ### Navegação mobile
 
 O frame mobile usa uma barra de abas inferior com um botão flutuante central
@@ -433,15 +473,6 @@ reduzido, com o motivo.
   e refresh — e o conteúdo atrás do scrim é o shell, não o catálogo.
 - Login social e recuperação de senha estão fora do escopo e são renderizados
   desabilitados.
-- "Início" e "Mercado" compartilham a URL da home (hero e catálogo na mesma
-  rota), então qual dos dois fica ativo no nav é decidido por scrollspy
-  (posição real de rolagem), não pela rota — ver
-  `use-catalog-section-active.ts`. O estado visual (negrito/cor de destaque/
-  sublinhado) é sempre correto. O `aria-current="page"` do próprio `<Link>` do
-  TanStack Router, porém, pode aparecer em ambos os itens simultaneamente
-  durante uma visita guiada só por rolagem (sem clicar em "Mercado"), porque o
-  Link força seu próprio `aria-current` quando SEU PRÓPRIO casamento de rota
-  é verdadeiro — por padrão, ignorando a hash. Uma correção por sincronização
-  de hash foi tentada e revertida: ela competia com a navegação do próprio
-  clique em "Mercado", podendo desfazer a seleção visual logo após o clique,
-  uma regressão pior que a duplicata cosmética de `aria-current`.
+- A busca do header leva ao Mercado e não abre um overlay próprio: o campo de
+  busca já é permanente naquela tela, e "/" o foca. O overlay dedicado do Figma
+  não foi implementado.

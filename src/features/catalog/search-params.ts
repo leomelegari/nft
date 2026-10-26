@@ -28,7 +28,7 @@ import {
  */
 export const DEFAULT_PAGE_SIZE = 9
 
-function csv<T extends string>(allowed: readonly T[]) {
+export function csv<T extends string>(allowed: readonly T[]) {
   return z
     .preprocess((value) => {
       if (typeof value === 'string') {
@@ -59,6 +59,16 @@ export const catalogSearchSchema = z.object({
 /** What the URL carries. Every field is optional. */
 export type CatalogSearch = z.infer<typeof catalogSearchSchema>
 
+/**
+ * "Nothing selected" — the canonical cleared state, which is a bare path.
+ *
+ * The cast is needed because `csv()` transforms make the inferred *output*
+ * type's array fields required (as `T[] | undefined`), while the URL itself is
+ * allowed to omit them entirely. An empty object is exactly what the router
+ * should receive, so this is asserted once here rather than at each call site.
+ */
+export const EMPTY_SEARCH = {} as CatalogSearch
+
 /** The same state with defaults applied, which is what the UI reads. */
 export interface ResolvedCatalogSearch {
   q: string
@@ -84,13 +94,25 @@ export function resolveSearch(search: CatalogSearch): ResolvedCatalogSearch {
   }
 }
 
-const DEFAULTS: Record<string, unknown> = { tab: 'all', sort: 'recent', page: 1 }
+/** Values that are never written to the URL, because reading applies them. */
+export const CATALOG_DEFAULTS: Record<string, unknown> = {
+  tab: 'all',
+  sort: 'recent',
+  page: 1,
+}
 
 /**
  * Produces the next search object: defaults removed, arrays joined, empties
  * dropped. The result is what gets pushed to the router.
+ *
+ * `defaults` is a parameter because the market screen adds params of its own
+ * (view, page size, availability) with their own default values, and they have
+ * to be omitted from the URL by the same rule.
  */
-export function buildSearch(next: Partial<ResolvedCatalogSearch>): CatalogSearch {
+export function buildSearchWith<TSearch>(
+  next: Record<string, unknown>,
+  defaults: Record<string, unknown>,
+): TSearch {
   const out: Record<string, unknown> = {}
 
   for (const [key, value] of Object.entries(next)) {
@@ -100,11 +122,15 @@ export function buildSearch(next: Partial<ResolvedCatalogSearch>): CatalogSearch
       out[key] = value.join(',')
       continue
     }
-    if (DEFAULTS[key] === value) continue
+    if (defaults[key] === value) continue
     out[key] = value
   }
 
-  return out as CatalogSearch
+  return out as TSearch
+}
+
+export function buildSearch(next: Partial<ResolvedCatalogSearch>): CatalogSearch {
+  return buildSearchWith<CatalogSearch>(next, CATALOG_DEFAULTS)
 }
 
 /**
@@ -119,7 +145,10 @@ export function withFilterChange(
 }
 
 /** The query string actually sent to the API. */
-export function toApiParams(search: ResolvedCatalogSearch) {
+export function toApiParams(
+  search: ResolvedCatalogSearch,
+  overrides: Record<string, unknown> = {},
+) {
   return {
     q: search.q,
     collection: search.collection.join(','),
@@ -130,6 +159,7 @@ export function toApiParams(search: ResolvedCatalogSearch) {
     sort: search.sort,
     page: search.page,
     pageSize: DEFAULT_PAGE_SIZE,
+    ...overrides,
   }
 }
 

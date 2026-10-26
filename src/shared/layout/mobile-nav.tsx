@@ -44,8 +44,7 @@ export function MobileNav({
               item.available ? (
                 <li key={item.label}>
                   <Link
-                    to="/"
-                    {...(item.hash ? { hash: item.hash } : {})}
+                    to={item.to}
                     onClick={() => onOpenChange(false)}
                     className="block rounded-md px-3 py-3 text-body-2xl font-bold text-foreground transition-colors hover:bg-secondary hover:text-text-accent"
                   >

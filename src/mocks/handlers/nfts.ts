@@ -1,7 +1,9 @@
 import { http, HttpResponse, delay } from 'msw'
 import {
+  AVAILABILITY_FILTERS,
   COLLECTION_SLUGS,
   NETWORKS,
+  type AvailabilityFilter,
   type CollectionSlug,
   type Network,
   type NftSort,
@@ -40,6 +42,7 @@ interface CatalogFilters {
   minPrice: string | null
   maxPrice: string | null
   tab: string
+  availability: AvailabilityFilter
 }
 
 function readFilters(url: URL): CatalogFilters {
@@ -50,7 +53,14 @@ function readFilters(url: URL): CatalogFilters {
     minPrice: url.searchParams.get('minPrice'),
     maxPrice: url.searchParams.get('maxPrice'),
     tab: url.searchParams.get('tab') ?? 'all',
+    availability: parseAvailability(url.searchParams.get('availability')),
   }
+}
+
+function parseAvailability(raw: string | null): AvailabilityFilter {
+  return (AVAILABILITY_FILTERS as readonly string[]).includes(raw ?? '')
+    ? (raw as AvailabilityFilter)
+    : 'all'
 }
 
 const NEW_RELEASE_CUTOFF = Date.UTC(2026, 7, 1)
@@ -69,6 +79,7 @@ function applyFilters(nfts: MockNft[], filters: CatalogFilters): MockNft[] {
     if (filters.tab === 'new' && new Date(nft.listedAt).getTime() < NEW_RELEASE_CUTOFF)
       return false
     if (filters.tab === 'trending' && nft.trendScore < TRENDING_THRESHOLD) return false
+    if (filters.availability === 'available' && nft.available === 0) return false
     return true
   })
 }

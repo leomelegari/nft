@@ -114,6 +114,24 @@ export const NFT_SORT_LABELS: Record<NftSort, string> = {
   trending: 'Em alta',
 }
 
+/**
+ * Availability filter.
+ *
+ * Sold-out items stay in the catalog by default — they are part of the
+ * market's history and the card marks them "Esgotado". The market screen can
+ * narrow to what is actually buyable, which is a server-side concern: filtering
+ * the current page on the client would leave the totals and page count lying
+ * about how many results exist.
+ */
+export const AVAILABILITY_FILTERS = ['all', 'available'] as const
+export const availabilityFilterSchema = z.enum(AVAILABILITY_FILTERS)
+export type AvailabilityFilter = z.infer<typeof availabilityFilterSchema>
+
+export const AVAILABILITY_LABELS: Record<AvailabilityFilter, string> = {
+  all: 'Todos os itens',
+  available: 'Somente disponíveis',
+}
+
 export const NFT_TABS = ['all', 'new', 'trending'] as const
 export const nftTabSchema = z.enum(NFT_TABS)
 export type NftTab = z.infer<typeof nftTabSchema>

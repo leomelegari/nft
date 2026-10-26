@@ -433,3 +433,15 @@ reduzido, com o motivo.
   e refresh — e o conteúdo atrás do scrim é o shell, não o catálogo.
 - Login social e recuperação de senha estão fora do escopo e são renderizados
   desabilitados.
+- "Início" e "Mercado" compartilham a URL da home (hero e catálogo na mesma
+  rota), então qual dos dois fica ativo no nav é decidido por scrollspy
+  (posição real de rolagem), não pela rota — ver
+  `use-catalog-section-active.ts`. O estado visual (negrito/cor de destaque/
+  sublinhado) é sempre correto. O `aria-current="page"` do próprio `<Link>` do
+  TanStack Router, porém, pode aparecer em ambos os itens simultaneamente
+  durante uma visita guiada só por rolagem (sem clicar em "Mercado"), porque o
+  Link força seu próprio `aria-current` quando SEU PRÓPRIO casamento de rota
+  é verdadeiro — por padrão, ignorando a hash. Uma correção por sincronização
+  de hash foi tentada e revertida: ela competia com a navegação do próprio
+  clique em "Mercado", podendo desfazer a seleção visual logo após o clique,
+  uma regressão pior que a duplicata cosmética de `aria-current`.

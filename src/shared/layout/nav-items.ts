@@ -13,13 +13,13 @@
 export interface NavItem {
   label: string
   available: boolean
-  /** Route path prefixes that light this item up. */
+  /** Route path prefixes that light this item up. Unused on the home route — see `isNavItemActive`. */
   activeOn: string[]
   hash?: string
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'Início', available: true, activeOn: ['/'] },
+  { label: 'Início', available: true, activeOn: [] },
   {
     label: 'Mercado',
     available: true,
@@ -30,9 +30,21 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Aprenda', available: false, activeOn: [] },
 ]
 
-export function isNavItemActive(item: NavItem, pathname: string): boolean {
-  if (item.activeOn.includes('/')) {
-    return pathname === '/'
+/**
+ * On every other route this is a plain prefix match. The home route is a
+ * special case: "Início" and "Mercado" share one URL, so which of the two is
+ * active is decided by which section is actually in view (see
+ * `useCatalogSectionActive`), not by the pathname.
+ */
+export function isNavItemActive(
+  item: NavItem,
+  pathname: string,
+  catalogSectionActive: boolean,
+): boolean {
+  if (pathname === '/') {
+    if (item.label === 'Início') return !catalogSectionActive
+    if (item.label === 'Mercado') return catalogSectionActive
+    return false
   }
   return item.activeOn.some((prefix) => pathname.startsWith(prefix))
 }

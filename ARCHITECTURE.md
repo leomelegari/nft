@@ -276,6 +276,11 @@ comportamento em telas reais.
 | Campos dos formulários | Estado inválido comunicado só pela cor da borda | `aria-invalid` mais mensagem associada por `aria-describedby` |
 | "Esqueceu a senha?" e login social | Links/botões sem destino no escopo | Renderizados como desabilitados; não aparentam sucesso funcional |
 
+| Coluna "Edições" do carrinho | Rotula a coluna que controla a **quantidade** | Coluna renomeada para "Quantidade"; a edição aparece sob o título do item |
+| Resumo da carteira | Valores com precisões diferentes: subtotal com 2 casas, total com 3 — as parcelas não fecham com o total | Todas as linhas em precisão total, de modo que subtotal − desconto + taxa = total exatamente |
+| Campo de cupom | `padding-left: 8px`, botão encostado, texto truncado | Campo e botão com espaçamento próprio |
+| Ícone de remover item | Sem rótulo acessível | `aria-label` nomeando o item removido |
+
 Correções posteriores continuam sendo registradas nesta tabela.
 
 ### Navegação mobile
@@ -310,6 +315,27 @@ armazenadas no cliente.
 
 Verificado: usuário A com 2 favoritos e 1 item no carrinho; após logout e login
 como usuário B, favoritos e carrinho de B retornam 0.
+
+## 9.2 Estado do carrinho
+
+O carrinho é um recurso do servidor, não um store no cliente. Visitantes são
+identificados por `X-Guest-Id`; usuários autenticados, pela sessão. Isso é o
+que torna a persistência após refresh e a mescla no login um comportamento de
+backend, e não lógica de UI.
+
+- **Quantidade e remoção não são otimistas.** O servidor é a autoridade sobre
+  disponibilidade e limite por pedido e pode recusar a alteração; mostrar e
+  desfazer seria pior que um spinner curto. A resposta é o carrinho
+  recalculado e substitui a entrada de cache diretamente.
+- **Os totais nunca são calculados no cliente.** Subtotal, desconto, taxa de
+  rede e total vêm de `POST /cart/quote`. O enunciado define a resposta da API
+  como referência para finalizar o pedido, então derivar no cliente arriscaria
+  exibir um total que o servidor não honraria.
+- **A cotação é reemitida** sempre que a versão do carrinho ou o cupom mudam,
+  e nunca é servida do cache — é um documento pontual, e cachear derrotaria o
+  portão de cotação desatualizada que ela existe para sustentar.
+- **O cupom vive na URL** (`/carrinho?cupom=`), então sobrevive a refresh e é
+  restaurado pelo histórico junto com o carrinho.
 
 ## 10. Limitações conhecidas
 

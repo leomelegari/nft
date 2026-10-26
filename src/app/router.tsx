@@ -35,6 +35,13 @@ export function createAppRouter(queryClient: QueryClient) {
     // tracking is disabled to keep a single source of truth.
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
+    /**
+     * Show the route's skeleton quickly, then hold it long enough to be read.
+     * The default 1s delay means a slow connection spends that whole second
+     * showing nothing at all, and without a minimum the skeleton can flash.
+     */
+    defaultPendingMs: 200,
+    defaultPendingMinMs: 400,
     defaultNotFoundComponent: NotFound,
     defaultErrorComponent: RouteError,
     scrollRestoration: true,

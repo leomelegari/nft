@@ -15,6 +15,7 @@ import {
   type ResolvedCatalogSearch,
 } from '@/features/catalog/search-params'
 import { CatalogHero } from '@/features/catalog/hero'
+import { HomePending } from '@/features/catalog/catalog-pending'
 import { CatalogGrid } from '@/features/catalog/catalog-grid'
 import { CatalogPagination } from '@/features/catalog/pagination'
 import { FiltersPanel } from '@/features/catalog/filters-panel'
@@ -35,6 +36,7 @@ export const Route = createFileRoute('/')({
       queryFn: ({ signal }) => fetchNfts(params, signal),
     })
   },
+  pendingComponent: HomePending,
   component: HomePage,
 })
 

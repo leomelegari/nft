@@ -10,6 +10,7 @@ import { MarketFilterBar } from '@/features/catalog/market/filter-bar'
 import { MarketOptions, MarketViewToggle } from '@/features/catalog/market/market-options'
 import { MarketResults } from '@/features/catalog/market/market-results'
 import { MarketStats } from '@/features/catalog/market/market-stats'
+import { MarketPending } from '@/features/catalog/catalog-pending'
 import {
   EMPTY_MARKET_SEARCH,
   buildMarketSearch,
@@ -52,6 +53,7 @@ export const Route = createFileRoute('/mercado')({
       queryFn: ({ signal }) => fetchNfts(params, signal),
     })
   },
+  pendingComponent: MarketPending,
   component: MarketPage,
 })
 

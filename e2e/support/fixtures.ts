@@ -148,3 +148,24 @@ export async function reachConfirmableCheckout(page: Page): Promise<void> {
 
   await expect(page.getByRole('button', { name: 'Confirmar compra' })).toBeEnabled()
 }
+
+/**
+ * The main navigation, wherever it lives at this viewport.
+ *
+ * Desktop renders it inline in the header; below `lg` it is behind the drawer
+ * button. Returning the right one keeps a single keyboard test honest on both
+ * projects instead of pretending mobile has no navigation.
+ */
+export async function openMainNav(page: Page) {
+  const inline = page.getByRole('banner').getByRole('navigation', {
+    name: 'Navegação principal',
+  })
+  if (await inline.isVisible()) return inline
+
+  await page.getByRole('button', { name: 'Abrir menu de navegação' }).click()
+  const drawer = page.getByRole('dialog').getByRole('navigation', {
+    name: 'Navegação principal',
+  })
+  await expect(drawer).toBeVisible()
+  return drawer
+}

@@ -9,7 +9,7 @@ import type { MockDb } from '@/mocks/db/types'
  * known scenario in full, which is what every Playwright test calls to get an
  * isolated starting state.
  */
-const STORAGE_KEY = 'greenmint.mock-db'
+const STORAGE_KEY = 'kurio.mock-db'
 
 let db: MockDb | null = null
 

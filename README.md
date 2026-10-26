@@ -1,4 +1,4 @@
-# GreenMint — Marketplace de NFTs
+# Kurio — Marketplace de NFTs
 
 Implementação do desafio frontend: um marketplace de NFTs em React + TypeScript,
 com backend inteiramente simulado (REST via MSW e tempo real via Socket.IO).

@@ -5,7 +5,7 @@
  *
  * Passwords are never stored, in plain text or otherwise.
  */
-const STORAGE_KEY = 'greenmint.session-token'
+const STORAGE_KEY = 'kurio.session-token'
 
 let inMemoryToken: string | null = null
 

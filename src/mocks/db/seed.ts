@@ -151,7 +151,7 @@ function buildNfts(seed: number): MockNft[] {
         available,
         version: 1,
         description:
-          `${title} integra a coleção ${collection.replace(/-/g, ' ')} com curadoria da GreenMint. ` +
+          `${title} integra a coleção ${collection.replace(/-/g, ' ')} com curadoria da Kurio. ` +
           'A peça é emitida on-chain com metadados imutáveis e procedência verificável, ' +
           'acompanhada de licença de uso pessoal para o colecionador.',
         gallery: [
@@ -191,8 +191,8 @@ export function digestPassword(password: string): string {
 
 /** Fictional credentials, documented in the README. */
 export const SEED_CREDENTIALS = [
-  { email: 'colecionador@greenmint.test', password: 'Colecionador1' },
-  { email: 'curadora@greenmint.test', password: 'Curadora2026' },
+  { email: 'colecionador@kurio.test', password: 'Colecionador1' },
+  { email: 'curadora@kurio.test', password: 'Curadora2026' },
 ] as const
 
 function buildUsers(): MockUser[] {
@@ -200,7 +200,7 @@ function buildUsers(): MockUser[] {
     {
       id: 'usr_colecionador',
       name: 'Marina Duarte',
-      email: 'colecionador@greenmint.test',
+      email: 'colecionador@kurio.test',
       avatar: '/avatars/user-1.svg',
       bio: 'Colecionadora de arte generativa desde 2021.',
       location: 'São Paulo, BR',
@@ -220,7 +220,7 @@ function buildUsers(): MockUser[] {
     {
       id: 'usr_curadora',
       name: 'Helena Vasques',
-      email: 'curadora@greenmint.test',
+      email: 'curadora@kurio.test',
       avatar: '/avatars/user-2.svg',
       bio: 'Curadora independente e pesquisadora de arte digital.',
       location: 'Lisboa, PT',

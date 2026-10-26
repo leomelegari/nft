@@ -3,6 +3,7 @@
 **Data**: 2026-10-26
 **Escopo**: repositório completo em `main`
 **Decisão**: REQUEST CHANGES — dois itens eliminatórios/zerados em aberto
+**Atualização (mesma data)**: C1, H1, H2 e M1 resolvidos. Resta **H3 (URL do deploy)**.
 
 ## Resumo
 
@@ -18,24 +19,32 @@ documentação, e é requisito explícito da seção 12).
 
 ## Findings
 
-### CRITICAL
+### CRITICAL — RESOLVIDO
 
-**C1 — Ausência de testes E2E (`npm run test:e2e` → "No tests found")**
+**C1 — ~~Ausência de testes E2E~~ (`npm run test:e2e` → "No tests found")**
 Seção 9 pede 12 fluxos cobertos, regressão visual de início/detalhe/carrinho/
 pagamento com baselines versionadas, execução em Chromium desktop e mobile,
 relatório HTML e traces. Não existe `playwright.config.*` nem um único spec.
 Seção 11: *"São eliminatórios: ... ausência de testes E2E executáveis."*
 Impacto: 10 pts + risco de eliminação.
 
+**Resolvido.** `playwright.config.ts` + 13 specs em `e2e/`, cobrindo os doze
+fluxos, com regressão visual de sete telas. **110 testes passando** em Chromium
+desktop (1440×900) e mobile (Pixel 5), contra o build de produção. Relatório
+HTML e traces configurados. Quatro bugs de produto foram encontrados e
+corrigidos no processo — ver abaixo.
+
 ### HIGH
 
-**H1 — `npm run lighthouse` quebra (`scripts/lighthouse.mjs` não existe)**
+**H1 — ~~`npm run lighthouse` quebra~~ (`scripts/lighthouse.mjs` não existe)**
 `package.json:12` aponta para um arquivo ausente; o comando encerra com
 `ERR_MODULE_NOT_FOUND`. Seção 10 pede 3 medições por página e perfil, mediana
 por categoria, relatórios HTML/JSON versionados, versões de ferramentas e
-registro de LCP/CLS/TBT. Nada disso existe. Impacto: 5 pts.
+registro de LCP/CLS/TBT. **Resolvido.** `scripts/lighthouse.mjs` + `lighthouse/config.mjs` versionado;
+12 execuções com relatórios HTML/JSON em `lighthouse/reports/`; medianas,
+ambiente, versões e análise em `lighthouse/RESULTS.md`.
 
-**H2 — README incompleto e marcado "🚧 Em construção"**
+**H2 — ~~README incompleto~~ — RESOLVIDO**
 Seção 12 exige: setup, variáveis de ambiente, credenciais fictícias, seleção e
 reset de cenários, comandos e instruções para reproduzir os fluxos de falha.
 Faltam credenciais, cenários (`?scenario=`, `VITE_MOCK_SCENARIO`,
@@ -49,7 +58,7 @@ nenhuma URL aparece no README ou no ARCHITECTURE.
 
 ### MEDIUM
 
-**M1 — Dois comandos anunciados no README não funcionam**
+**M1 — ~~Dois comandos anunciados no README não funcionam~~ — RESOLVIDO**
 `npm run test:e2e` e `npm run lighthouse` constam na tabela de scripts. Um
 avaliador que rodar a tabela encontra dois erros.
 
@@ -93,3 +102,24 @@ que os testes E2E terão de cobrir.
 1. **C1** — infra Playwright + os 12 fluxos + baselines visuais (destrava a eliminação)
 2. **H1** — `scripts/lighthouse.mjs` + relatórios versionados
 3. **H2/H3** — README completo com credenciais, cenários, falhas e URL pública
+
+
+## Bugs de produto encontrados pelos testes
+
+| # | Problema | Correção |
+| --- | --- | --- |
+| 1 | Pagamento recusado esvaziava o carrinho e não devolvia o estoque | A recusa restaura as linhas e a disponibilidade, emitindo `nft.updated` |
+| 2 | Clique triplo em "Confirmar compra" disparava 3 POSTs (2× 409, 1× 201) e a tela ficava sem feedback | Trava síncrona por ref; `isPending` é estado do React e chega tarde demais no mesmo tick |
+| 3 | "Tentar novamente" num erro de rota nunca recuperava — a query rejeitada seguia em cache | O retry descarta as queries em erro e reinvalida a rota |
+| 4 | Telas de listagem ficavam em branco ~2,5s em rede lenta: o loader resolve antes do componente montar, então o skeleton nunca aparecia | `pendingComponent` em `/` e `/mercado`, com `defaultPendingMs: 200` |
+
+## Estado final da validação
+
+| Check | Resultado |
+| --- | --- |
+| Type check | Pass |
+| Lint | Pass |
+| Format | Pass |
+| Build | Pass |
+| Testes E2E | **110/110** (desktop + mobile) |
+| Lighthouse | Executa; A11y 100, BP 100, SEO 92, Perf 99 desktop / 85 mobile (justificado) |

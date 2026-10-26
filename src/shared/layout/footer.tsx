@@ -35,9 +35,9 @@ export function Footer() {
             >
               <div
                 aria-hidden="true"
-                className="flex size-[74px] items-center justify-center rounded-full bg-primary text-heading font-bold text-ink"
+                className="flex size-[74px] items-center justify-center rounded-full bg-primary text-ink"
               >
-                {highlight.initial}
+                <highlight.Icon className="size-8" />
               </div>
               <h2 className="mt-3 text-body-xl font-bold text-foreground">
                 {highlight.title}

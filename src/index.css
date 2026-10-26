@@ -1,0 +1,183 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/roboto-mono/wght.css';
+
+/*
+ * GreenMint design tokens — extracted from Figma
+ * "Marketplace de NFTs GreenMint" (file tAmT3NyU772hVw3MGt539G).
+ * The design ships a single dark theme; there is no light variant in the file,
+ * so the dark palette is the default and only theme. See ARCHITECTURE.md.
+ */
+@theme {
+  /* Raw palette */
+  --color-ink: #140d0a;
+  --color-surface-card: #241612;
+  --color-surface-dark: #38220f;
+  --color-background-elevated: #fbfbfb;
+  --color-border-strong: #3f2319;
+  --color-border-soft: #55321f;
+  --color-brand-primary: #d28a4c;
+  --color-brand-secondary: #b39463;
+  --color-text-accent: #e89b55;
+  --color-text-primary: #f7f3ec;
+  --color-text-secondary: #cfb28c;
+  --color-foreground-cream: #f5f1eb;
+
+  /* Status colors (not in Figma — derived to sit in the warm palette) */
+  --color-success: #7bb661;
+  --color-warning: #e8b955;
+  --color-danger: #d9603f;
+
+  /* Type scale */
+  --font-mono: 'Roboto Mono Variable', ui-monospace, 'Roboto Mono', monospace;
+  --font-sans: var(--font-mono);
+
+  --text-tiny: 0.5625rem; /* 9  */
+  --text-tiny--line-height: 1;
+  --text-micro: 0.625rem; /* 10 */
+  --text-micro--line-height: 1;
+  --text-caption: 0.75rem; /* 12 */
+  --text-caption--line-height: 0.875rem;
+  --text-caption-lg: 0.8125rem; /* 13 */
+  --text-caption-lg--line-height: 1.375rem;
+  --text-body: 0.875rem; /* 14 */
+  --text-body--line-height: 1.375rem;
+  --text-body-md: 0.9375rem; /* 15 */
+  --text-body-md--line-height: 1.0625rem;
+  --text-body-lg: 1rem; /* 16 */
+  --text-body-lg--line-height: 1.25rem;
+  --text-body-xl: 1.0625rem; /* 17 */
+  --text-body-xl--line-height: 1.25rem;
+  --text-body-2xl: 1.125rem; /* 18 */
+  --text-body-2xl--line-height: 1.5rem;
+  --text-heading: 1.5rem; /* 24 */
+  --text-heading--line-height: 1.75rem;
+  --text-display: 2.6875rem; /* 43 */
+  --text-display--line-height: 4.375rem;
+
+  --tracking-label: 0.1em;
+
+  /* Layout */
+  --spacing-shell: 75rem; /* 1200px content column from the Figma frames */
+}
+
+/*
+ * shadcn/ui semantic variables, mapped onto the GreenMint palette so every
+ * generated component inherits the identity without per-component overrides.
+ */
+:root {
+  --radius: 0.5rem;
+
+  --background: var(--color-ink);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-surface-card);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-surface-card);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--color-brand-primary);
+  --primary-foreground: var(--color-ink);
+  --secondary: var(--color-surface-dark);
+  --secondary-foreground: var(--color-text-primary);
+  --muted: var(--color-surface-dark);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-text-accent);
+  --accent-foreground: var(--color-ink);
+  --destructive: var(--color-danger);
+  --destructive-foreground: var(--color-text-primary);
+  --border: var(--color-border-strong);
+  --input: var(--color-border-soft);
+  --ring: var(--color-text-accent);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background font-mono text-foreground antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Visible focus is a hard requirement of the brief (section 8). */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+}
+
+/*
+ * Shimmer used by every data-dependent skeleton. Disabled wholesale under
+ * reduced-motion, where the skeleton degrades to a static block that still
+ * reserves the exact layout box.
+ */
+@utility shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-surface-card);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--color-border-soft) 70%, transparent) 50%,
+      transparent 100%
+    );
+    animation: shimmer-sweep 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes shimmer-sweep {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .shimmer::after {
+    display: none;
+  }
+}

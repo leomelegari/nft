@@ -1,0 +1,246 @@
+# Arquitetura — GreenMint
+
+Decisões técnicas, contratos e limitações conhecidas da solução.
+
+> Documento vivo: atualizado a cada etapa da entrega.
+
+## 1. Visão geral
+
+A aplicação é uma SPA React servida por Vite. Não existe backend real: toda a
+superfície REST e o canal de tempo real são simulados por **MSW**, que roda tanto
+em desenvolvimento quanto no build de demonstração e nos testes Playwright.
+
+```
+UI (features/)
+  ↕  TanStack Query          estado remoto, cache, invalidação
+  ↕  Axios (shared/api)      transporte + normalização de erro
+  ↕  MSW (mocks/)            backend simulado + condições de rede
+```
+
+### Camadas
+
+| Caminho            | Responsabilidade                                                                     |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| `src/entities`     | Schemas Zod — **única** definição dos contratos. Os tipos da UI são inferidos daqui. |
+| `src/shared/api`   | Instância Axios, interceptors, `ApiError`, token de sessão.                          |
+| `src/shared/money` | Aritmética decimal em ETH. Único lugar com cálculo monetário.                        |
+| `src/features`     | Fluxos de produto (catálogo, carrinho, checkout, conta).                             |
+| `src/mocks`        | Backend simulado: banco em memória, handlers REST, cenários.                         |
+
+### Princípio de fronteira
+
+Componentes, hooks e o cliente Axios **não** contêm respostas fictícias nem
+caminhos alternativos de negócio. Qualquer comportamento simulado vive em
+`src/mocks`. Trocar o MSW por um backend real não exigiria mudanças na UI.
+
+## 2. Tipagem dos contratos
+
+Todo payload REST é validado por um schema Zod em `src/entities` no momento em
+que atravessa o Axios (`request()` em `shared/api/client.ts`). Uma mudança de
+shape no servidor falha na fronteira de transporte com uma mensagem precisa, em
+vez de virar `undefined` no meio da árvore de componentes.
+
+Os mesmos schemas de input validam os formulários, de modo que cliente e
+servidor simulado não podem discordar sobre o que é válido.
+
+## 3. Precisão monetária
+
+Valores em ETH trafegam como **strings decimais** e nunca são convertidos para
+`number`. `shared/money` encapsula toda a aritmética com `decimal.js`:
+
+- `addEth`, `subEth`, `mulEth`, `percentOfEth`, `compareEth`
+- quantidades são inteiras e validadas como tal
+- `subEth` satura em zero: um desconto maior que o subtotal não gera cobrança negativa
+
+Verificado end to end: subtotal `1.98` → desconto 10% `0.198` → taxa `0.0044` →
+total `1.7864`, sem desvio de ponto flutuante.
+
+## 4. Contratos REST
+
+Base: `/api`. Coleções retornam envelope `{ data, meta }`; recursos
+individuais retornam o objeto diretamente.
+
+### Sessão e conta
+
+| Método | Rota             | Descrição                                       |
+| ------ | ---------------- | ----------------------------------------------- |
+| `POST` | `/auth/register` | Cria conta. `409 CONFLICT` em e-mail duplicado. |
+| `POST` | `/auth/login`    | Retorna `{ token, session }`.                   |
+| `GET`  | `/auth/session`  | Sessão atual. `401` quando ausente ou expirada. |
+| `POST` | `/auth/logout`   | `204`. Idempotente.                             |
+
+### NFTs
+
+| Método | Rota           | Descrição                                                                                |
+| ------ | -------------- | ---------------------------------------------------------------------------------------- |
+| `GET`  | `/nfts`        | `q`, `collection`, `network`, `minPrice`, `maxPrice`, `tab`, `sort`, `page`, `pageSize`. |
+| `GET`  | `/nfts/facets` | Contagens por coleção/rede e faixa de preço.                                             |
+| `GET`  | `/nfts/:slug`  | Detalhe. `404` quando inexistente.                                                       |
+
+As facetas são calculadas sobre o resultado da busca textual **ignorando** as
+seleções de coleção e rede, para que escolher uma coleção não zere as demais
+linhas da sidebar.
+
+### Favoritos, carrinho, cotação, pedidos, perfil, carteiras
+
+| Método                              | Rota                   | Descrição                                                 |
+| ----------------------------------- | ---------------------- | --------------------------------------------------------- |
+| `GET` / `PUT` / `DELETE`            | `/favorites[/:nftId]`  | Por usuário autenticado.                                  |
+| `GET`                               | `/cart`                | Carrinho do dono (usuário ou visitante via `X-Guest-Id`). |
+| `POST`                              | `/cart/items`          | Respeita `available` e `maxPerOrder`.                     |
+| `PATCH` / `DELETE`                  | `/cart/items/:itemId`  | Alterar quantidade / remover.                             |
+| `POST`                              | `/cart/merge`          | Mescla carrinho do visitante no do usuário após login.    |
+| `POST`                              | `/cart/quote`          | Emite documento de preço. Aplica/valida cupom.            |
+| `POST`                              | `/orders`              | Criação **idempotente** (header `Idempotency-Key`).       |
+| `GET`                               | `/orders/:orderId`     | Recibo. `403` para pedido de outro usuário.               |
+| `GET` / `PATCH`                     | `/profile`             | Dados do colecionador.                                    |
+| `PUT`                               | `/profile/avatar`      | Avatar como data URL.                                     |
+| `POST`                              | `/profile/password`    | Alteração de senha.                                       |
+| `GET` / `POST` / `PATCH` / `DELETE` | `/wallets[/:walletId]` | Carteiras principal e secundária.                         |
+
+### Taxonomia de erros
+
+Toda falha responde `{ error: { code, message, fields?, details? } }`.
+
+| Código                              | HTTP | Uso                                                       |
+| ----------------------------------- | ---: | --------------------------------------------------------- |
+| `VALIDATION_ERROR`                  |  422 | Campos inválidos; `fields` mapeia campo → mensagem.       |
+| `UNAUTHENTICATED`                   |  401 | Sem sessão.                                               |
+| `SESSION_EXPIRED`                   |  401 | Token apresentado, porém expirado.                        |
+| `FORBIDDEN`                         |  403 | Recurso de outro usuário.                                 |
+| `NOT_FOUND`                         |  404 | Recurso inexistente.                                      |
+| `CONFLICT`                          |  409 | Cadastro duplicado.                                       |
+| `AVAILABILITY_CONFLICT`             |  409 | Estoque insuficiente.                                     |
+| `COUPON_INVALID` / `COUPON_EXPIRED` |  422 | Cupom.                                                    |
+| `QUOTE_STALE`                       |  409 | Cotação desatualizada ou com divergências.                |
+| `IDEMPOTENCY_CONFLICT`              |  409 | Mesma chave com conteúdo diferente.                       |
+| `PAYMENT_DECLINED`                  |  402 | Liquidação recusada.                                      |
+| `TRANSIENT_ERROR`                   |  503 | Falha transitória; é a única classe com retry automático. |
+
+O interceptor do Axios converte qualquer falha (inclusive queda de rede e
+timeout) em `ApiError`, de modo que nenhum componente inspeciona
+`error.response.data`.
+
+## 5. Idempotência de pedidos
+
+`POST /orders` exige `Idempotency-Key`. O servidor guarda `(chave, usuário,
+hash do corpo, pedido)`:
+
+- **mesma chave + mesmo corpo** → retorna o pedido original (`200`), sem nova compra;
+- **mesma chave + corpo diferente** → `409 IDEMPOTENCY_CONFLICT`;
+- o pedido é persistido **antes** do timeout simulado, então repetir após um
+  timeout recupera o mesmo pedido.
+
+Verificado: no cenário `order-timeout`, a primeira tentativa pendura, a segunda
+recupera o pedido e o total de pedidos permanece **1**.
+
+## 6. Portão de cotação desatualizada
+
+`POST /cart/quote` emite um documento com `subtotal`, `desconto`, `taxa de rede`,
+`total` e uma lista de `issues`. Um `issue` é gerado quando preço, quantidade
+disponível ou existência do item mudou em relação ao que o usuário viu.
+
+`POST /orders` recusa com `QUOTE_STALE` quando a cotação:
+
+- não existe, não pertence ao usuário ou expirou;
+- carrega qualquer `issue`;
+- referencia uma versão de carrinho diferente da atual.
+
+A UI, portanto, não consegue confirmar uma compra com números desatualizados —
+é o requisito da seção 7 do enunciado.
+
+## 7. Política de cache (TanStack Query)
+
+| Parâmetro              | Valor                  | Razão                                                                                                                  |
+| ---------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `staleTime`            | 30s                    | Catálogo e detalhe servem do cache enquanto revalidam; eventos de socket empurram mudanças autoritativas no intervalo. |
+| `gcTime`               | 5min                   | Mantém páginas do catálogo quentes para navegação pelo histórico.                                                      |
+| `retry` (queries)      | 2, backoff exponencial | Desabilitado para 4xx, que são determinísticos.                                                                        |
+| `retry` (mutations)    | 0                      | Pedido é repetido explicitamente pelo checkout com a chave de idempotência; retry cego competiria com isso.            |
+| `refetchOnWindowFocus` | `false`                | Evita refetch em massa ao alternar abas durante o checkout.                                                            |
+
+Isolamento por usuário e por parâmetros de consulta é feito via chaves de query
+namespacadas pelo id do usuário, de modo que logout e troca de conta limpam
+dados privados sem varredura manual.
+
+## 8. Camada de mocks
+
+### Banco simulado
+
+Banco em memória espelhado em `localStorage` (`greenmint.mock-db`), versionado
+por schema. `resetDb()` restaura integralmente um cenário conhecido — é o que
+cada teste Playwright chama para partir de estado isolado.
+
+Fixtures são geradas por um PRNG **determinístico** (`mulberry32`, seed
+`20260426`): o catálogo é byte a byte idêntico em toda execução, o que as
+baselines de regressão visual e as auditorias Lighthouse exigem.
+
+- **239 NFTs**, distribuídos exatamente conforme as contagens da sidebar do Figma
+- preços entre `0.02` e `12.30` ETH, como no filtro de faixa de preço
+- 1 a 3 edições por NFT, com `available` e `maxPerOrder` próprios
+- ~8% das edições nascem esgotadas, para alimentar o caminho "edição esgotada"
+- 2 usuários fictícios com carteiras cadastradas
+
+### Credenciais fictícias
+
+| E-mail                        | Senha           |
+| ----------------------------- | --------------- |
+| `colecionador@greenmint.test` | `Colecionador1` |
+| `curadora@greenmint.test`     | `Curadora2026`  |
+
+Senhas nunca são armazenadas em claro: o fixture guarda apenas um digest
+simulado (`digestPassword`), que não é um KDF real e não pretende sê-lo.
+
+### Cupons
+
+| Código         | Efeito                      |
+| -------------- | --------------------------- |
+| `GREENMINT10`  | 10% de desconto             |
+| `DROP20`       | 20% de desconto             |
+| `EXPIRADO15`   | Expirado → `COUPON_EXPIRED` |
+| qualquer outro | `COUPON_INVALID`            |
+
+### Cenários
+
+Selecionados por `?scenario=<id>` (persistido) ou `VITE_MOCK_SCENARIO`. O mesmo
+registro serve desenvolvimento, demonstração e testes, então um bug reproduzido
+à mão é reproduzido igual por um teste.
+
+| Id                 | Comportamento                                                          |
+| ------------------ | ---------------------------------------------------------------------- |
+| `default`          | Latência 80–220ms, sem falhas. Base das auditorias e baselines.        |
+| `slow`             | Latência 1,5–3s. Exercita skeletons.                                   |
+| `jitter`           | Latência 100ms–2,5s com respostas de catálogo **fora de ordem**.       |
+| `flaky`            | ~35% das requisições falham com `503`.                                 |
+| `offline`          | Todas as requisições falham como queda de conexão.                     |
+| `timeout`          | Requisições nunca resolvem.                                            |
+| `empty-catalog`    | Listagem retorna zero resultados com `meta` coerente.                  |
+| `session-expiring` | Sessão expira 20s após o login.                                        |
+| `payment-declined` | Pedido criado como pendente e recusado na liquidação.                  |
+| `order-timeout`    | Pedido persistido, resposta nunca chega; recuperável por idempotência. |
+| `price-change`     | Preços mudam ao cotar; checkout bloqueia a confirmação.                |
+| `sold-out`         | Primeiro item do carrinho esgota ao cotar.                             |
+
+Endpoints de controle (`/api/__mock/reset`, `/api/__mock/scenario`) **ignoram**
+as condições de rede de propósito: um teste precisa conseguir resetar mesmo com
+o cenário `offline` ou `timeout` ativo.
+
+O seed da aleatoriedade de cenário é fixo (`21`), escolhido para que as
+primeiras ~20 amostras reflitam a taxa de falha configurada em vez de um surto
+atípico — importante porque um teste curto observa justamente essa janela.
+
+## 9. Desvios do Figma
+
+| Item                                     | Decisão                                                                                                                                                                                                                     |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contagens de rede na sidebar (119/78/86) | Somam um total diferente do das coleções no próprio arquivo. As contagens de **coleção** foram reproduzidas exatamente; as de rede são derivadas dos dados reais, já que o enunciado exige que as consultas reflitam a API. |
+| Tema claro                               | O arquivo define apenas um tema escuro; não há variante clara a implementar.                                                                                                                                                |
+
+## 10. Limitações conhecidas
+
+Esta seção cresce ao longo da entrega e registra o que foi deliberadamente
+reduzido, com o motivo.
+
+- Liquidação de pedido é resolvida sob demanda em `GET /orders/:id` enquanto a
+  camada Socket.IO não está instalada; a partir dela, o evento passa a ser o
+  caminho primário e este permanece como reconciliação após refresh/reconexão.

@@ -21,7 +21,10 @@ import {
   type MarketSearch,
   type ResolvedMarketSearch,
 } from '@/features/catalog/market/market-search-params'
-import { useSearchShortcut } from '@/features/catalog/market/use-search-shortcut'
+import {
+  useFocusSearchRequest,
+  useSearchShortcut,
+} from '@/features/catalog/market/use-search-focus'
 
 /** The search field lives in the filter bar; the shortcut needs its id. */
 const SEARCH_FIELD_ID = 'market-search'
@@ -58,6 +61,7 @@ function MarketPage() {
   const href = useRouterState({ select: (state) => state.location.href })
 
   useSearchShortcut(SEARCH_FIELD_ID)
+  useFocusSearchRequest(SEARCH_FIELD_ID)
 
   const catalog = useCatalogQuery(toMarketApiParams(search))
   const facets = useFacetsQuery({

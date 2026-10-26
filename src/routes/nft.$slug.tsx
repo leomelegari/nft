@@ -65,8 +65,7 @@ function NftDetailPage() {
           </li>
           <li>
             <Link
-              to="/"
-              hash="catalogo"
+              to="/mercado"
               className="rounded-sm transition-colors hover:text-text-accent"
             >
               Mercado

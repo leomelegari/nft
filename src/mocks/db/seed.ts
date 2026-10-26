@@ -1,4 +1,9 @@
-import { COLLECTION_SLUGS, type CollectionSlug, NETWORKS } from '@/entities/nft'
+import {
+  COLLECTION_LABELS,
+  COLLECTION_SLUGS,
+  type CollectionSlug,
+  NETWORKS,
+} from '@/entities/nft'
 import { toEth } from '@/shared/money'
 import { createRandom } from '@/mocks/db/random'
 import type { MockDb, MockNft, MockUser } from '@/mocks/db/types'
@@ -158,7 +163,7 @@ function buildNfts(seed: number): MockNft[] {
         available,
         version: 1,
         description:
-          `${title} integra a coleção ${collection.replace(/-/g, ' ')} com curadoria da Kurio. ` +
+          `${title} integra a coleção ${COLLECTION_LABELS[collection]} com curadoria da Kurio. ` +
           'A peça é emitida on-chain com metadados imutáveis e procedência verificável, ' +
           'acompanhada de licença de uso pessoal para o colecionador.',
         gallery: [

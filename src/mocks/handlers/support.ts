@@ -63,15 +63,18 @@ export function fail(
 export async function applyNetworkConditions(): Promise<void> {
   const { network } = getScenario()
 
-  if (network.offline) {
-    throw new MockHttpError(HttpResponse.error())
-  }
-
   if (network.timeout) {
     await delay('infinite')
   }
 
+  // Latency is applied before any failure, including the offline case: a real
+  // connection failure is detected after a wait, not instantly, and an
+  // instant rejection would hide the optimistic window the UI relies on.
   await delay(scenarioDelayMs())
+
+  if (network.offline) {
+    throw new MockHttpError(HttpResponse.error())
+  }
 
   if (shouldFailTransiently()) {
     fail('TRANSIENT_ERROR', 'Serviço temporariamente indisponível. Tente novamente.')

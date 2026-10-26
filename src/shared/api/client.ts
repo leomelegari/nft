@@ -1,7 +1,8 @@
 import axios, { type AxiosRequestConfig } from 'axios'
 import type { z } from 'zod'
 import { normalizeError } from '@/shared/api/error'
-import { getSessionToken } from '@/shared/api/session-token'
+import { clearSessionToken, getSessionToken } from '@/shared/api/session-token'
+import { notifySessionInvalidated } from '@/features/auth/session-events'
 
 /**
  * The single Axios instance every REST call goes through. It owns three
@@ -25,7 +26,22 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error: unknown) => Promise.reject(normalizeError(error)),
+  (error: unknown) => {
+    const apiError = normalizeError(error)
+
+    /**
+     * A session the server no longer accepts is dropped here, once, for every
+     * caller. Expiry can surface on any request — including mid-checkout — so
+     * handling it per call site would mean handling it in a dozen places and
+     * missing one.
+     */
+    if (apiError.isSessionProblem) {
+      clearSessionToken()
+      notifySessionInvalidated()
+    }
+
+    return Promise.reject(apiError)
+  },
 )
 
 /**

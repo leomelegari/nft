@@ -273,6 +273,9 @@ comportamento em telas reais.
 | Avaliação em estrelas | Cinco gráficos sem rótulo | Uma imagem rotulada ("4,6 de 5 estrelas") |
 | Divisor do painel de detalhe | Largura fixa de 573px dentro de coluna flexível | Largura total da coluna |
 
+| Campos dos formulários | Estado inválido comunicado só pela cor da borda | `aria-invalid` mais mensagem associada por `aria-describedby` |
+| "Esqueceu a senha?" e login social | Links/botões sem destino no escopo | Renderizados como desabilitados; não aparentam sucesso funcional |
+
 Correções posteriores continuam sendo registradas nesta tabela.
 
 ### Navegação mobile
@@ -284,6 +287,30 @@ gatilho. A decisão troca fidelidade por conteúdo não obstruído e por um alvo
 navegação acessível; o botão flutuante, que não tem comportamento definido no
 enunciado, foi omitido.
 
+## 9.1 Sessão
+
+Token em `localStorage`, enviado como `Authorization: Bearer`. Senhas nunca são
+armazenadas no cliente.
+
+- **Expiração** é tratada **uma vez**, no interceptor do Axios: qualquer resposta
+  `UNAUTHENTICATED`/`SESSION_EXPIRED` limpa o token e publica um evento. A
+  alternativa — tratar em cada chamada — significaria tratar em doze lugares e
+  esquecer um, justamente no checkout.
+- **Contexto de retorno**: rotas privadas usam `beforeLoad` e redirecionam para
+  `/entrar?redirect=<destino>`, então uma sessão que expira no meio do checkout
+  retoma de onde parou.
+- **Logout e troca de usuário**: todo recurso privado vive sob
+  `['owner', ownerKey]`, então remover esse prefixo descarta tudo de uma vez —
+  não existe lista de coisas a limpar que possa ficar desatualizada. Um novo id
+  de visitante é emitido para que a próxima sessão anônima comece com carrinho
+  vazio em vez de herdar o anterior.
+- **Carrinho do visitante** é mesclado via `POST /cart/merge` antes de a sessão
+  ser publicada no cache, de modo que a primeira renderização como usuário
+  autenticado já mostra o carrinho mesclado.
+
+Verificado: usuário A com 2 favoritos e 1 item no carrinho; após logout e login
+como usuário B, favoritos e carrinho de B retornam 0.
+
 ## 10. Limitações conhecidas
 
 Esta seção cresce ao longo da entrega e registra o que foi deliberadamente
@@ -292,3 +319,8 @@ reduzido, com o motivo.
 - Liquidação de pedido é resolvida sob demanda em `GET /orders/:id` enquanto a
   camada Socket.IO não está instalada; a partir dela, o evento passa a ser o
   caminho primário e este permanece como reconciliação após refresh/reconexão.
+- No Figma os modais de login e cadastro aparecem sobre a página do marketplace.
+  Aqui `/entrar` e `/cadastro` são rotas próprias — o que garante acesso direto
+  e refresh — e o conteúdo atrás do scrim é o shell, não o catálogo.
+- Login social e recuperação de senha estão fora do escopo e são renderizados
+  desabilitados.

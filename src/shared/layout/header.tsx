@@ -105,7 +105,7 @@ export function Header({
           </button>
 
           <Link
-            to="/"
+            to="/carrinho"
             className="relative rounded-sm p-1 text-foreground transition-colors hover:text-text-accent"
           >
             <CartIcon className="size-6" aria-hidden="true" />

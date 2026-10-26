@@ -4,6 +4,7 @@ import { Footer } from '@/shared/layout/footer'
 import { Header } from '@/shared/layout/header'
 import { MobileNav } from '@/shared/layout/mobile-nav'
 import { useCartItemCount } from '@/features/cart/queries'
+import { FOCUS_SEARCH_STATE } from '@/features/catalog/market/use-search-focus'
 
 /**
  * Page chrome shared by every route: header, mobile drawer and footer, with the
@@ -35,8 +36,10 @@ export function AppShell({
         onOpenSearch={() => {
           // Search belongs to the market screen, which owns the filter bar.
           // The icon used to call `scrollIntoView('#catalogo')`, which was a
-          // no-op on every route other than the home page.
-          void navigate({ to: '/mercado' })
+          // no-op on every route other than the home page. The state asks that
+          // screen to put the cursor in the field, so the user can type right
+          // away; see `useFocusSearchRequest`.
+          void navigate({ to: '/mercado', state: FOCUS_SEARCH_STATE })
         }}
       />
 

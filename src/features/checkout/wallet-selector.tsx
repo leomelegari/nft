@@ -66,7 +66,14 @@ export function WalletSelector({
         Carteira e rede
       </h3>
 
-      <fieldset className="flex flex-col gap-4">
+      {/*
+        `min-w-0` is load-bearing: the UA stylesheet gives `fieldset` a
+        `min-inline-size: min-content`, so it refuses to shrink below its
+        widest unbreakable content — a 42-character wallet address. Without
+        this the fieldset grows past the 405px summary column and the whole
+        panel overflows.
+      */}
+      <fieldset className="flex min-w-0 flex-col gap-4">
         <legend className="sr-only">Selecione a carteira para pagamento</legend>
 
         {wallets.map((wallet) => {

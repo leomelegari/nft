@@ -12,12 +12,19 @@ export function FormField({
   label,
   error,
   hint,
+  required = false,
   children,
   labelVisible = true,
 }: {
   label: string
   error?: string | undefined
   hint?: string | undefined
+  /**
+   * Renders the design's coral asterisk. It is `aria-hidden` because the
+   * requirement is already carried by the control's own `required`
+   * attribute — announcing it twice is noise.
+   */
+  required?: boolean
   labelVisible?: boolean
   children: (props: {
     id: string
@@ -43,6 +50,11 @@ export function FormField({
         )}
       >
         {label}
+        {required && (
+          <span aria-hidden="true" className="ml-0.5 text-text-coral">
+            *
+          </span>
+        )}
       </label>
 
       {children({

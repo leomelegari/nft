@@ -100,7 +100,7 @@ do mercado, e o card o marca como tal.
 | `POST`                              | `/orders`              | Criação **idempotente** (header `Idempotency-Key`).       |
 | `GET`                               | `/orders/:orderId`     | Recibo. `403` para pedido de outro usuário.               |
 | `GET` / `PATCH`                     | `/profile`             | Dados do colecionador.                                    |
-| `PUT`                               | `/profile/avatar`      | Avatar como data URL.                                     |
+| `PUT` / `DELETE`                    | `/profile/avatar`      | Avatar como data URL; `DELETE` limpa.                     |
 | `POST`                              | `/profile/password`    | Alteração de senha.                                       |
 | `GET` / `POST` / `PATCH` / `DELETE` | `/wallets[/:walletId]` | Carteiras principal e secundária.                         |
 
@@ -351,6 +351,45 @@ ao vivo a lista muda sem nenhuma ação que o leitor de tela narre sozinho, e a
 contagem é o único sinal de que o resultado se moveu. Ela fica sempre montada
 de propósito: uma região inserida no mesmo instante em que o conteúdo aparece
 frequentemente não é anunciada.
+
+### Perfil do colecionador e Carteiras
+
+As duas telas compartilham a sidebar de conta do Figma. Dos oito destinos, só
+"Dados do perfil" e "Carteiras" existem no escopo; "Atividade", "Lista de
+interesse", "Ofertas", "Arquivos baixados" e "Suporte" não têm tela no arquivo
+nem endpoint atrás. São renderizados — sem eles a sidebar não representaria o
+design — mas inertes com `aria-disabled`, a mesma regra aplicada a "Criadores" e
+"Aprenda" no nav principal. O item atual é marcado pela régua de 6px à esquerda,
+não por cor, e é o único com `aria-current`.
+
+**Campos do perfil.** O Figma pede "Nome de exibição", "Nome de usuário",
+"E-mail", "Nome ENS", "Apelido da carteira" e Avatar. Destes, "Nome de usuário"
+e "Nome ENS" não têm nada que os armazene ou leia nesta tela, e "Apelido da
+carteira" pertence a uma carteira — onde já existe e é editável. No lugar deles
+entram "Bio" e "Localização": são o restante do perfil que a API expõe, e sem
+eles a tela não conseguiria editar metade dele.
+
+**Dois botões "Salvar".** O Figma põe um único botão ao pé da tela, abaixo dos
+campos de perfil *e* do bloco de senha. São operações distintas em endpoints
+distintos, e um botão só teria de responder "o perfil salvou mas a senha atual
+estava errada" — um estado sem boa mensagem. Cada bloco envia o seu, e trocar a
+senha continua sendo um ato deliberado em vez de efeito colateral de editar uma
+bio.
+
+**Campos das carteiras.** O formulário de carteiras do Figma repete cinco campos
+da tela de perfil (nome de exibição, nome do perfil, e-mail, nome ENS, código de
+indicação), que são da conta e não da carteira. Restam os quatro que a carteira
+de fato tem, na grade de duas colunas do design: apelido, rede, tipo e endereço.
+O endereço é validado por rede (hex EVM ou base58 Solana) pelo mesmo schema que
+a API usa.
+
+**"Igual à carteira principal".** O rádio não foi reproduzido: duas carteiras com
+o mesmo endereço é exatamente o que a API rejeita, e o checkout distingue uma da
+outra pelo endereço.
+
+**`DELETE /profile/avatar`.** O `PUT` só aceita data URL e o `PATCH /profile` não
+toca no avatar, então "Remover" precisava de rota própria — `avatar` é nulável no
+usuário.
 
 ### Navegação mobile
 

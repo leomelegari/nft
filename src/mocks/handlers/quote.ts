@@ -6,7 +6,7 @@ import { buildCart, cartSubtotal } from '@/mocks/db/cart'
 import { findCoupon, isExpired } from '@/mocks/db/coupons'
 import { getScenario } from '@/mocks/scenarios'
 import type { MockQuote } from '@/mocks/db/types'
-import { fail, handler, parseBody, requireAuth } from '@/mocks/handlers/support'
+import { fail, handler, ownerKeyFor, parseBody } from '@/mocks/handlers/support'
 
 /** Deterministic fee so totals are stable across runs and visual baselines. */
 const FEE_BASE = '0.0035'
@@ -117,14 +117,18 @@ export const quoteHandlers = [
   /**
    * POST rather than GET: issuing a quote creates a server-side pricing
    * document that the order endpoint later validates by id.
+   *
+   * Open to visitors as well as signed-in users: the cart screen is public and
+   * has to show a truthful subtotal, discount, network fee and total. Only
+   * order creation requires a session.
    */
   http.post(
     '/api/cart/quote',
     handler(async ({ request }) => {
-      const { user } = requireAuth(request)
+      const ownerKey = ownerKeyFor(request)
       const input = await parseBody(request, quoteInputSchema)
 
-      const before = buildCart(user.id)
+      const before = buildCart(ownerKey)
       const baseline: MockQuote['snapshot'] = before.items.map((item) => ({
         cartItemId: item.id,
         unitPriceEth: item.unitPriceEth,
@@ -133,7 +137,7 @@ export const quoteHandlers = [
 
       applyScenarioDrift(before)
 
-      const cart = buildCart(user.id)
+      const cart = buildCart(ownerKey)
       const subtotal = cartSubtotal(cart)
 
       let coupon = null
@@ -162,13 +166,13 @@ export const quoteHandlers = [
 
       // The previous quote is the baseline when one exists, so a change that
       // happened between two checkout visits is also caught.
-      const previous = getDb().quotes.find((item) => item.ownerKey === user.id)
+      const previous = getDb().quotes.find((item) => item.ownerKey === ownerKey)
       const issues = diffIssues(previous?.snapshot ?? baseline, cart)
 
       const now = new Date()
       const quote: MockQuote = {
         id: nextId('qt'),
-        ownerKey: user.id,
+        ownerKey,
         cartVersion: cart.version,
         subtotalEth: subtotal,
         discountEth: discount,
@@ -186,7 +190,7 @@ export const quoteHandlers = [
       }
 
       mutateDb((draft) => {
-        draft.quotes = draft.quotes.filter((item) => item.ownerKey !== user.id)
+        draft.quotes = draft.quotes.filter((item) => item.ownerKey !== ownerKey)
         draft.quotes.push(quote)
       })
 

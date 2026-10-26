@@ -50,10 +50,12 @@ export const orderSchema = z.object({
   totalEth: ethAmountSchema,
   coupon: couponSchema.nullable(),
   collector: z.object({
-    name: z.string(),
+    displayName: z.string(),
+    username: z.string(),
     email: z.string(),
-    country: z.string(),
-    city: z.string(),
+    profileName: z.string(),
+    referralCode: z.string(),
+    note: z.string(),
   }),
   wallet: z.object({
     label: z.string(),
@@ -70,11 +72,26 @@ export const orderSchema = z.object({
 })
 export type Order = z.infer<typeof orderSchema>
 
+/**
+ * Collector details captured at checkout, mirroring the fields in the Figma
+ * payment form.
+ *
+ * The design marks every field required, including "Código de indicação" and
+ * "Nome ENS". A referral code cannot be mandatory — nobody without one could
+ * ever buy — so only the fields the order genuinely needs are required here.
+ * See ARCHITECTURE.md.
+ */
 export const collectorInputSchema = z.object({
-  name: z.string().min(2, 'Informe seu nome completo'),
-  email: z.string().min(1, 'Informe seu e-mail').email('Informe um e-mail válido'),
-  country: z.string().min(2, 'Informe o país'),
-  city: z.string().min(2, 'Informe a cidade'),
+  displayName: z.string().trim().min(2, 'Informe o nome de exibição'),
+  username: z
+    .string()
+    .trim()
+    .min(3, 'Informe um nome de usuário com ao menos 3 caracteres')
+    .regex(/^[a-zA-Z0-9._-]+$/, 'Use apenas letras, números, ponto, hífen ou underscore'),
+  email: z.string().trim().min(1, 'Informe seu e-mail').email('Informe um e-mail válido'),
+  profileName: z.string().trim().max(60, 'Máximo de 60 caracteres').default(''),
+  referralCode: z.string().trim().max(32, 'Máximo de 32 caracteres').default(''),
+  note: z.string().trim().max(280, 'Máximo de 280 caracteres').default(''),
 })
 export type CollectorInput = z.infer<typeof collectorInputSchema>
 

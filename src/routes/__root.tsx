@@ -1,9 +1,12 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 import type { RouterContext } from '@/app/router'
+import { AppShell } from '@/shared/layout/app-shell'
 import { NotFound } from '@/shared/ui/not-found'
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootLayout,
+  // Rendered inside the root component's Outlet, so it is already wrapped by
+  // AppShell and must not add a second one.
   notFoundComponent: NotFound,
 })
 
@@ -17,7 +20,9 @@ function RootLayout() {
       >
         Pular para o conteúdo
       </a>
-      <Outlet />
+      <AppShell>
+        <Outlet />
+      </AppShell>
     </div>
   )
 }

@@ -39,3 +39,9 @@ dist-ssr
 
 # TanStack Router plugin scratch output
 .tanstack
+
+# Playwright run output (relatório e traces são regenerados por execução)
+e2e/report
+e2e/.artifacts
+playwright-report
+test-results

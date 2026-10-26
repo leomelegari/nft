@@ -1,4 +1,9 @@
-import { addFirstNftToCart, expect, reachConfirmableCheckout, test } from './support/fixtures'
+import {
+  addFirstNftToCart,
+  expect,
+  reachConfirmableCheckout,
+  test,
+} from './support/fixtures'
 
 /** Flows 9 and 10 — Socket.IO during checkout, and event resilience. */
 test.describe('tempo real', () => {
@@ -70,7 +75,9 @@ test.describe('tempo real', () => {
       (id) =>
         fetch(`/api/nfts?page=1&pageSize=48`)
           .then((r) => r.json())
-          .then((d) => d.data.find((n: { id: string }) => n.id === id)?.priceEth as string),
+          .then(
+            (d) => d.data.find((n: { id: string }) => n.id === id)?.priceEth as string,
+          ),
       nftId,
     )
     expect(priceOnScreen).toBe(result.priceEth)
@@ -98,7 +105,9 @@ test.describe('tempo real', () => {
 
     const orders = await page.evaluate(() =>
       fetch('/api/orders', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('kurio.session-token')}` },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('kurio.session-token')}`,
+        },
       })
         .then((r) => r.json())
         .then((d) => d.data.length as number),

@@ -7,14 +7,8 @@ import {
   type Network,
   type NftFacets,
 } from '@/entities/nft'
-import {
-  FilterCheckboxRow,
-  PriceRangeFields,
-} from '@/features/catalog/filter-controls'
-import {
-  SORTED_COLLECTION_SLUGS,
-  toggleValue,
-} from '@/features/catalog/filter-options'
+import { FilterCheckboxRow, PriceRangeFields } from '@/features/catalog/filter-controls'
+import { SORTED_COLLECTION_SLUGS, toggleValue } from '@/features/catalog/filter-options'
 import { CatalogSearchField } from '@/features/catalog/toolbar'
 import type { ResolvedCatalogSearch } from '@/features/catalog/search-params'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover'
@@ -54,19 +48,11 @@ export function MarketFilterBar({
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border-soft bg-card p-3 lg:flex-row lg:items-center">
       <div className="min-w-0 lg:flex-1">
-        <CatalogSearchField
-          id={searchFieldId}
-          value={search.q}
-          onSearch={onSearch}
-        />
+        <CatalogSearchField id={searchFieldId} value={search.q} onSearch={onSearch} />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <FilterPopover
-          label="Coleções"
-          count={search.collection.length}
-          className="w-72"
-        >
+        <FilterPopover label="Coleções" count={search.collection.length} className="w-72">
           <fieldset>
             <legend className="text-body-md font-bold text-foreground">
               Filtrar por coleção

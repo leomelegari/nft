@@ -9,15 +9,25 @@ test.describe('detalhe do NFT', () => {
 
     await page.goto(href!)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(title)
-    await expect(page.getByRole('navigation', { name: 'Trilha de navegação' })).toBeVisible()
+    await expect(
+      page.getByRole('navigation', { name: 'Trilha de navegação' }),
+    ).toBeVisible()
   })
 
   test('NFT inexistente mostra o estado de não encontrado', async ({ page }) => {
     await page.goto('/nft/este-nft-nao-existe')
-    await expect(page.getByRole('alert').or(page.getByText(/não existe|não encontrad/i)).first()).toBeVisible()
+    await expect(
+      page
+        .getByRole('alert')
+        .or(page.getByText(/não existe|não encontrad/i))
+        .first(),
+    ).toBeVisible()
   })
 
-  test('o limite por pedido trava o incremento de quantidade', async ({ page, visit }) => {
+  test('o limite por pedido trava o incremento de quantidade', async ({
+    page,
+    visit,
+  }) => {
     await visit('/mercado')
     await firstCard(page).locator('h3 a').click()
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
@@ -32,7 +42,9 @@ test.describe('detalhe do NFT', () => {
     }
 
     await expect(increase).toBeDisabled()
-    const limitText = await page.getByText(/Limite de \d+ unidades|Restam \d+ unidades/).innerText()
+    const limitText = await page
+      .getByText(/Limite de \d+ unidades|Restam \d+ unidades/)
+      .innerText()
     const cap = Number(limitText.match(/\d+/)![0])
     await expect(output).toHaveText(String(cap))
   })

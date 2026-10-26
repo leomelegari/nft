@@ -35,7 +35,10 @@ test.describe('conta e sessão', () => {
     await visit('/entrar')
     await page.getByRole('textbox', { name: 'E-mail' }).fill(USERS.collector.email)
     await page.locator('input[type=password]').first().fill('SenhaErrada1')
-    await page.getByRole('button', { name: /^entrar$/i }).last().click()
+    await page
+      .getByRole('button', { name: /^entrar$/i })
+      .last()
+      .click()
 
     // The API attaches this one to the fields, so it renders under the input
     // rather than as a form-level alert.
@@ -50,7 +53,10 @@ test.describe('conta e sessão', () => {
 
     await page.getByRole('textbox', { name: 'E-mail' }).fill(USERS.collector.email)
     await page.locator('input[type=password]').first().fill(USERS.collector.password)
-    await page.getByRole('button', { name: /^entrar$/i }).last().click()
+    await page
+      .getByRole('button', { name: /^entrar$/i })
+      .last()
+      .click()
 
     await expect(page).toHaveURL(/\/perfil/)
   })
@@ -58,9 +64,14 @@ test.describe('conta e sessão', () => {
   test('logout limpa os dados privados em cache', async ({ page, visit, signIn }) => {
     await signIn()
     await visit('/perfil')
-    await expect(page.getByRole('heading', { name: 'Perfil do colecionador' })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: 'Perfil do colecionador' }),
+    ).toBeVisible()
 
-    await page.getByRole('navigation', { name: 'Minha conta' }).getByRole('button', { name: /Sair/ }).click()
+    await page
+      .getByRole('navigation', { name: 'Minha conta' })
+      .getByRole('button', { name: /Sair/ })
+      .click()
     await expect(page).toHaveURL('/')
     await expect(page.getByRole('link', { name: 'Entrar' })).toBeVisible()
 
@@ -81,7 +92,10 @@ test.describe('conta e sessão', () => {
     const profileEmail = page.locator('main input[name=email]')
     await expect(profileEmail).toHaveValue(USERS.collector.email)
 
-    await page.getByRole('navigation', { name: 'Minha conta' }).getByRole('button', { name: /Sair/ }).click()
+    await page
+      .getByRole('navigation', { name: 'Minha conta' })
+      .getByRole('button', { name: /Sair/ })
+      .click()
     await expect(page).toHaveURL('/')
 
     await signIn('curator')
@@ -100,7 +114,9 @@ test.describe('conta e sessão', () => {
     await signIn()
 
     await visit('/perfil')
-    await expect(page.getByRole('heading', { name: 'Perfil do colecionador' })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: 'Perfil do colecionador' }),
+    ).toBeVisible()
 
     await expect(async () => {
       await page.reload()

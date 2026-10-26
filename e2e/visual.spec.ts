@@ -61,14 +61,18 @@ test.describe('regressão visual', () => {
   test('perfil do colecionador', async ({ page, visit, signIn }) => {
     await signIn()
     await visit('/perfil')
-    await expect(page.getByRole('heading', { name: 'Perfil do colecionador' })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: 'Perfil do colecionador' }),
+    ).toBeVisible()
     await expect(page).toHaveScreenshot('perfil.png', { fullPage: true })
   })
 
   test('carteiras', async ({ page, visit, signIn }) => {
     await signIn()
     await visit('/carteiras')
-    await expect(page.getByRole('heading', { name: 'Carteiras', exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: 'Carteiras', exact: true }),
+    ).toBeVisible()
     await expect(page).toHaveScreenshot('carteiras.png', { fullPage: true })
   })
 })

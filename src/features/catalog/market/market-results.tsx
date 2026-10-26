@@ -75,9 +75,7 @@ export function MarketResults({
       {isFetching && <CatalogBusyStrip />}
       <ul className={containerClass}>
         {nfts.map((nft, index) => {
-          const favoriteSlot = (
-            <FavoriteButton nft={nft} onRequireAuth={onRequireAuth} />
-          )
+          const favoriteSlot = <FavoriteButton nft={nft} onRequireAuth={onRequireAuth} />
 
           return (
             <li key={nft.id}>

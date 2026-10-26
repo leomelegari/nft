@@ -4,7 +4,9 @@ import { expect, firstCard, test } from './support/fixtures'
 /** Prices as rendered on the cards, in document order. */
 async function ascendingPrices(page: Page): Promise<boolean> {
   const texts = await page.locator('article p.font-bold').allInnerTexts()
-  const values = texts.map((text) => Number(text.replace(/[^\d.,]/g, '').replace(',', '.')))
+  const values = texts.map((text) =>
+    Number(text.replace(/[^\d.,]/g, '').replace(',', '.')),
+  )
   if (values.length === 0 || values.some(Number.isNaN)) return false
   return values.every((value, index) => index === 0 || values[index - 1]! <= value)
 }
@@ -18,10 +20,7 @@ async function ascendingPrices(page: Page): Promise<boolean> {
  * survives a refresh and the back button.
  */
 test.describe('catálogo', () => {
-  test('busca ao vivo escreve na URL sem poluir o histórico', async ({
-    page,
-    visit,
-  }) => {
+  test('busca ao vivo escreve na URL sem poluir o histórico', async ({ page, visit }) => {
     await visit('/mercado')
     const before = await page.evaluate(() => history.length)
 

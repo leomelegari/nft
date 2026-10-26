@@ -99,7 +99,10 @@ export const test = base.extend<Fixtures>({
       await page.goto('/entrar')
       await page.getByRole('textbox', { name: 'E-mail' }).fill(email)
       await page.locator('input[type=password]').first().fill(password)
-      await page.getByRole('button', { name: /^entrar$/i }).last().click()
+      await page
+        .getByRole('button', { name: /^entrar$/i })
+        .last()
+        .click()
       // The header's "Entrar" link is replaced by the account menu.
       await expect(page.getByRole('link', { name: 'Entrar' })).toHaveCount(0)
     })
@@ -110,7 +113,10 @@ export { expect }
 
 /** First catalog card on whichever listing screen is open. */
 export function firstCard(page: Page) {
-  return page.locator('article').filter({ has: page.locator('h3 a') }).first()
+  return page
+    .locator('article')
+    .filter({ has: page.locator('h3 a') })
+    .first()
 }
 
 /**
@@ -129,7 +135,12 @@ export async function addFirstNftToCart(page: Page): Promise<string> {
 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(title)
   await page.getByRole('button', { name: 'COMPRAR' }).click()
-  await expect(page.getByRole('status').filter({ hasText: /carrinho/i }).first()).toBeVisible()
+  await expect(
+    page
+      .getByRole('status')
+      .filter({ hasText: /carrinho/i })
+      .first(),
+  ).toBeVisible()
 
   return title
 }

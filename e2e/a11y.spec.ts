@@ -53,7 +53,10 @@ test.describe('acessibilidade', () => {
 
     await page.getByRole('textbox', { name: 'E-mail' }).fill('invalido')
     await page.locator('input[type=password]').first().fill('x')
-    await page.getByRole('button', { name: /^entrar$/i }).last().click()
+    await page
+      .getByRole('button', { name: /^entrar$/i })
+      .last()
+      .click()
 
     const email = page.getByRole('textbox', { name: 'E-mail' })
     await expect(email).toHaveAttribute('aria-invalid', 'true')

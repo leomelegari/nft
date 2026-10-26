@@ -4,7 +4,9 @@ import { expect, firstCard, test } from './support/fixtures'
 test.describe('favoritos', () => {
   test('visitante é convidado a entrar', async ({ page, visit }) => {
     await visit('/mercado')
-    await firstCard(page).getByRole('button', { name: /Adicionar aos favoritos/ }).click()
+    await firstCard(page)
+      .getByRole('button', { name: /Adicionar aos favoritos/ })
+      .click()
     await expect(page).toHaveURL(/\/entrar/)
   })
 
@@ -26,10 +28,9 @@ test.describe('favoritos', () => {
     await saved
 
     await page.reload()
-    await expect(firstCard(page).getByRole('button', { name: /favoritos/ })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
+    await expect(
+      firstCard(page).getByRole('button', { name: /favoritos/ }),
+    ).toHaveAttribute('aria-pressed', 'true')
   })
 
   test('falha na mutation reverte o estado', async ({ page, visit, signIn, mocks }) => {

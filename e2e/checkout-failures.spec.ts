@@ -1,4 +1,9 @@
-import { addFirstNftToCart, expect, reachConfirmableCheckout, test } from './support/fixtures'
+import {
+  addFirstNftToCart,
+  expect,
+  reachConfirmableCheckout,
+  test,
+} from './support/fixtures'
 
 /** Flow 7 — declined payment, repeated clicks and timeout recovery. */
 test.describe('falhas no pagamento', () => {
@@ -37,13 +42,15 @@ test.describe('falhas no pagamento', () => {
     })
 
     await expect(page).toHaveURL(/\/pedido\//, { timeout: 25_000 })
-    await expect(
-      page.getByText(/Compra confirmada|Processando/).first(),
-    ).toBeVisible({ timeout: 25_000 })
+    await expect(page.getByText(/Compra confirmada|Processando/).first()).toBeVisible({
+      timeout: 25_000,
+    })
 
     const orders = await page.evaluate(() =>
       fetch('/api/orders', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('kurio.session-token')}` },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('kurio.session-token')}`,
+        },
       })
         .then((r) => r.json())
         .then((d) => (Array.isArray(d.data) ? d.data.length : d.length)),
@@ -69,12 +76,17 @@ test.describe('falhas no pagamento', () => {
 
     // Retrying reuses the idempotency key and recovers the same order rather
     // than buying twice.
-    await page.getByRole('button', { name: /Confirmar compra|Tentar novamente/ }).first().click()
+    await page
+      .getByRole('button', { name: /Confirmar compra|Tentar novamente/ })
+      .first()
+      .click()
     await expect(page).toHaveURL(/\/pedido\//, { timeout: 30_000 })
 
     const orders = await page.evaluate(() =>
       fetch('/api/orders', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('kurio.session-token')}` },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('kurio.session-token')}`,
+        },
       })
         .then((r) => r.json())
         .then((d) => (Array.isArray(d.data) ? d.data.length : d.length)),

@@ -13,7 +13,10 @@ test.describe('carrinho', () => {
     const total = page.getByText(/ETH/).last()
     const before = await total.innerText()
 
-    await page.getByRole('button', { name: /Aumentar/i }).first().click()
+    await page
+      .getByRole('button', { name: /Aumentar/i })
+      .first()
+      .click()
     await expect(page.locator('output').first()).toHaveText('2')
     await expect.poll(async () => total.innerText()).not.toBe(before)
 

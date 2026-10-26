@@ -1,4 +1,9 @@
-import { addFirstNftToCart, expect, reachConfirmableCheckout, test } from './support/fixtures'
+import {
+  addFirstNftToCart,
+  expect,
+  reachConfirmableCheckout,
+  test,
+} from './support/fixtures'
 
 /** Flow 6 — the complete purchase, catalog to confirmed receipt. */
 test.describe('compra completa', () => {
@@ -11,7 +16,7 @@ test.describe('compra completa', () => {
 
     await page.getByRole('button', { name: 'Confirmar compra' }).click()
 
-    await expect(page).toHaveURL(/\/pedido\//);
+    await expect(page).toHaveURL(/\/pedido\//)
     await expect(page.getByText('Compra confirmada')).toBeVisible({ timeout: 20_000 })
     await expect(page.getByText(title).first()).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Transação' })).toBeVisible()
@@ -48,10 +53,7 @@ test.describe('compra completa', () => {
     await expect(page.getByText(/ETH/).last()).toHaveText(total)
   })
 
-  test('acesso direto ao pedido de outro usuário é negado', async ({
-    page,
-    signIn,
-  }) => {
+  test('acesso direto ao pedido de outro usuário é negado', async ({ page, signIn }) => {
     await signIn()
     await addFirstNftToCart(page)
     await reachConfirmableCheckout(page)
@@ -65,6 +67,8 @@ test.describe('compra completa', () => {
 
     await signIn('curator')
     await page.goto(receiptUrl)
-    await expect(page.getByText(/não encontrado|permissão|não existe/i).first()).toBeVisible()
+    await expect(
+      page.getByText(/não encontrado|permissão|não existe/i).first(),
+    ).toBeVisible()
   })
 })

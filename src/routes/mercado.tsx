@@ -109,10 +109,7 @@ function MarketPage() {
     [applySearch, search],
   )
 
-  const clearFilters = useCallback(
-    () => applySearch(EMPTY_MARKET_SEARCH),
-    [applySearch],
-  )
+  const clearFilters = useCallback(() => applySearch(EMPTY_MARKET_SEARCH), [applySearch])
 
   /** Favouriting needs a session; send the visitor back here afterwards. */
   const requireAuth = useCallback(() => {
@@ -198,10 +195,10 @@ function hasMarketFilters(search: ResolvedMarketSearch): boolean {
   return (
     Boolean(
       search.q ||
-        search.collection.length ||
-        search.network.length ||
-        search.minPrice ||
-        search.maxPrice,
+      search.collection.length ||
+      search.network.length ||
+      search.minPrice ||
+      search.maxPrice,
     ) ||
     search.tab !== 'all' ||
     search.availability !== 'all'

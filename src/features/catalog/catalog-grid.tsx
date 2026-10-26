@@ -48,9 +48,7 @@ export function CatalogGrid({
   if (error) return <CatalogErrorState error={error} onRetry={onRetry} />
 
   if (nfts.length === 0) {
-    return (
-      <CatalogEmptyState hasFilters={hasFilters} onClearFilters={onClearFilters} />
-    )
+    return <CatalogEmptyState hasFilters={hasFilters} onClearFilters={onClearFilters} />
   }
 
   return (

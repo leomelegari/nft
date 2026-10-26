@@ -7,6 +7,7 @@ import { findCoupon, isExpired } from '@/mocks/db/coupons'
 import { getScenario } from '@/mocks/scenarios'
 import type { MockQuote } from '@/mocks/db/types'
 import { fail, handler, ownerKeyFor, parseBody } from '@/mocks/handlers/support'
+import { emitNftUpdated } from '@/mocks/socket/events'
 
 /** Deterministic fee so totals are stable across runs and visual baselines. */
 const FEE_BASE = '0.0035'
@@ -27,7 +28,8 @@ function applyScenarioDrift(cart: Cart): void {
   if (!behavior.priceChangeOnQuote && !behavior.soldOutOnQuote) return
   if (cart.items.length === 0) return
 
-  mutateDb((draft) => {
+  const changed = mutateDb((draft) => {
+    const touched: typeof draft.nfts = []
     for (const [index, line] of cart.items.entries()) {
       const nft = draft.nfts.find((item) => item.id === line.nftId)
       const edition = nft?.editions.find((item) => item.id === line.editionId)
@@ -48,8 +50,15 @@ function applyScenarioDrift(cart: Cart): void {
       )
       nft.priceEth = cheapest.priceEth
       nft.version += 1
+      touched.push(nft)
     }
+
+    return touched
   })
+
+  // The REST change and the event announcing it are published together, so
+  // they cannot disagree.
+  for (const nft of changed) emitNftUpdated(nft)
 }
 
 /**

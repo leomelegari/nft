@@ -372,6 +372,58 @@ de negócio); falhas de rede e timeout preservam a tentativa.
 | Timeout após criar o pedido             | Pedido persistido; o timeout do Axios reabilita o botão; retry recupera **o mesmo pedido**, total permanece 1 |
 | Recibo após mudança no catálogo         | Valores inalterados — o recibo é um snapshot                                                                  |
 
+## 9.4 Tempo real
+
+O cliente é um **`socket.io-client` real**. A outra ponta é um servidor
+simulado em `src/mocks/socket`, construído sobre a interceptação de WebSocket
+do MSW mais o binding do protocolo Socket.IO
+([`@mswjs/socket.io-binding`](https://github.com/mswjs/socket.io-binding)).
+Nenhum evento é injetado chamando setters, callbacks ou o cache diretamente —
+tudo trafega pelo socket.
+
+### Eventos
+
+| Evento          | Comportamento                                                                                                    |
+| --------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `nft.updated`   | Atualiza preço e disponibilidade no catálogo, no detalhe e nas linhas do carrinho, recalculando o total da linha |
+| `order.updated` | Atualiza o estado do pedido; estados terminais nunca são sobrescritos                                            |
+
+Todo evento carrega `eventId`, `resourceId`, `version` monotônica, `occurredAt`
+e `sessionId`.
+
+- **Duplicatas e eventos antigos** são descartados por um _version ledger_ antes
+  de tocarem o cache: nada com versão menor ou igual à já aplicada é processado,
+  então nenhum efeito é reaplicado e estado mais novo nunca regride.
+- **Eventos são validados** contra o contrato Zod; um payload malformado é
+  ignorado em vez de entrar no cache.
+- **Escopo por sessão**: um evento com `sessionId` só chega ao cliente dono
+  daquela sessão, de modo que um evento de uma sessão anterior não atualiza
+  dados de outro usuário. `sessionId: null` é broadcast (catálogo é público).
+- **Reconexão reconcilia com REST**: o que aconteceu enquanto o socket esteve
+  fora nunca foi entregue e não pode ser reproduzido, então as queries ativas
+  são invalidadas e o REST é a autoridade.
+- **Listeners são liberados** no unmount e a cada troca de identidade.
+
+### Limitações do transporte no ambiente de mocks
+
+| Limitação                                                   | Razão                                                                                                                                                                                                                                                                           |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Apenas `transports: ['websocket']`                          | O handshake de long-polling HTTP do Socket.IO não é implementado pela camada simulada                                                                                                                                                                                           |
+| O link do MSW usa o padrão `*`                              | O casamento de caminho de WebSocket do MSW não considera a query string, e o `socket.io-client` sempre anexa `?EIO=4&transport=websocket`. Todo socket que não seja `/socket.io/` — notadamente o canal de HMR do Vite — é explicitamente repassado ao servidor real            |
+| `socket.io-client` é importado dinamicamente                | A biblioteca captura `window.WebSocket` quando seu módulo avalia. O MSW substitui `window.WebSocket` ao iniciar; um import estático, puxado pelo grafo de módulos antes de `startMocks()`, ligaria o construtor **não** substituído e toda conexão escaparia da camada de mocks |
+| `@mswjs/socket.io-binding@0.2.0` declara peer `msw ^2.10.2` | O projeto usa MSW v3 e o binding funciona; `.npmrc` fixa `legacy-peer-deps=true` para que um checkout limpo instale com `npm install`                                                                                                                                           |
+| Fechamento abrupto do cliente                               | Nem o pacote `disconnect` do Socket.IO nem o `close` do WebSocket chegam até o servidor simulado através do binding. O cliente anuncia `bye` ao encerrar, e o registro ainda faz _prune_ por liveness antes de cada publicação                                                  |
+
+### Verificado
+
+| Cenário                                       | Resultado                                                            |
+| --------------------------------------------- | -------------------------------------------------------------------- |
+| Preço alterado por evento                     | Catálogo e carrinho atualizam ao vivo, sem refetch                   |
+| 3 entregas idênticas + 1 evento antigo        | Todas ignoradas; o preço permanece o da versão mais recente          |
+| NFT no carrinho muda durante o checkout       | Confirmação **bloqueada**, 0 pedidos criados; após revisão, confirma |
+| Queda de conexão com pedido pendente + reload | Pedido recuperado, total permanece **1**                             |
+| Troca de identidade (visitante → autenticado) | Assinatura preservada, sem vazamento nem duplicação                  |
+
 ## 10. Limitações conhecidas
 
 Esta seção cresce ao longo da entrega e registra o que foi deliberadamente

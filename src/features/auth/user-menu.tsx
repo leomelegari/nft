@@ -76,6 +76,13 @@ export function UserMenu({ currentHref }: { currentHref: string }) {
               Perfil do colecionador
             </Link>
             <Link
+              to="/lista-de-interesse"
+              onClick={() => setOpen(false)}
+              className="rounded-md px-3 py-2 text-body text-foreground transition-colors hover:bg-secondary"
+            >
+              Lista de interesse
+            </Link>
+            <Link
               to="/carteiras"
               onClick={() => setOpen(false)}
               className="rounded-md px-3 py-2 text-body text-foreground transition-colors hover:bg-secondary"

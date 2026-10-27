@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { Wordmark } from '@/shared/layout/wordmark'
 import {
   COMPATIBLE_WALLETS,
@@ -90,20 +91,31 @@ export function Footer() {
             <nav key={column.title} aria-label={column.title}>
               <h2 className="text-body-2xl font-bold text-foreground">{column.title}</h2>
               <ul className="mt-2">
-                {column.links.map((link) => (
-                  <li key={link}>
-                    {/*
-                      These destinations are outside the delivery scope. They are
-                      rendered as inert text rather than links to nowhere.
-                    */}
-                    <span
-                      aria-disabled="true"
-                      className="block text-body leading-[30px] text-foreground/70"
-                    >
-                      {link}
-                    </span>
-                  </li>
-                ))}
+                {column.links.map((link) =>
+                  link.to ? (
+                    <li key={link.label}>
+                      <Link
+                        to={link.to}
+                        className="block rounded-sm text-body leading-[30px] text-foreground/70 transition-colors hover:text-text-accent"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ) : (
+                    <li key={link.label}>
+                      {/*
+                        Outside the delivery scope: inert text rather than a
+                        link to nowhere, so it cannot look functional.
+                      */}
+                      <span
+                        aria-disabled="true"
+                        className="block text-body leading-[30px] text-foreground/70"
+                      >
+                        {link.label}
+                      </span>
+                    </li>
+                  ),
+                )}
               </ul>
             </nav>
           ))}

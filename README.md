@@ -55,10 +55,10 @@ Todas opcionais — os valores de `.env.example` já são os padrões.
 
 Nenhuma senha é armazenada em claro; o banco simulado guarda apenas um digest.
 
-| E-mail                    | Senha           | Observação                                                                 |
-| ------------------------- | --------------- | -------------------------------------------------------------------------- |
-| `colecionador@kurio.test` | `Colecionador1` | Carteira principal MetaMask na Ethereum.                                   |
-| `curadora@kurio.test`     | `Curadora2026`  | Carteira principal na Polygon. Usada para verificar o isolamento de dados. |
+| E-mail                    | Senha           | Observação                                                                                           |
+| ------------------------- | --------------- | ---------------------------------------------------------------------------------------------------- |
+| `colecionador@kurio.test` | `Colecionador1` | Carteira principal MetaMask na Ethereum e um NFT na lista de interesse.                              |
+| `curadora@kurio.test`     | `Curadora2026`  | Carteira principal na Polygon, lista de interesse vazia. Usada para verificar o isolamento de dados. |
 
 Cadastro livre também funciona; o e-mail já existente retorna conflito.
 

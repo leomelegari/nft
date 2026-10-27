@@ -9,13 +9,18 @@ import DangerTriangleIcon from '@/assets/icons/danger-triangle.svg?react'
 /**
  * The account sidebar's eight destinations, in the Figma's order.
  *
- * Only "Dados do perfil" and "Carteiras" are in the delivery scope; the other
- * five are editorial or post-purchase areas with no screen in the file and no
- * endpoint behind them. They are rendered — the sidebar would misrepresent the
+ * "Dados do perfil", "Carteiras" and "Lista de interesse" are in scope. The
+ * first two are required screens; the third is not named by the brief, but
+ * favourites are required to persist and the control to save one is on every
+ * card, so leaving it inert meant saving NFTs with nowhere to see them.
+ *
+ * The remaining four — "Atividade", "Ofertas", "Arquivos baixados" and
+ * "Suporte" — are named in the brief as outside the delivery and have no
+ * screen in the Figma and no endpoint behind them. They are rendered — the sidebar would misrepresent the
  * design without them — but marked unavailable so they cannot look functional,
  * the same rule the main nav applies to "Criadores" and "Aprenda".
  */
-export type AccountNavTarget = '/perfil' | '/carteiras'
+export type AccountNavTarget = '/perfil' | '/carteiras' | '/lista-de-interesse'
 
 interface AccountNavItemBase {
   label: string
@@ -37,7 +42,12 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
   { label: 'Dados do perfil', icon: UserIcon, available: true, to: '/perfil' },
   { label: 'Carteiras', icon: LocationIcon, available: true, to: '/carteiras' },
   { label: 'Atividade', icon: ShoppingIcon, available: false },
-  { label: 'Lista de interesse', icon: HeartIcon, available: false },
+  {
+    label: 'Lista de interesse',
+    icon: HeartIcon,
+    available: true,
+    to: '/lista-de-interesse',
+  },
   { label: 'Ofertas', icon: ActivityIcon, available: false },
   { label: 'Arquivos baixados', icon: DownloadIcon, available: false },
   { label: 'Suporte', icon: DangerTriangleIcon, available: false },

@@ -97,6 +97,25 @@ test.describe('acessibilidade', () => {
     await expect(page.locator(`#${describedBy!.split(' ')[0]}`)).toBeVisible()
   })
 
+  test('não há perda de conteúdo em larguras de reflow', async ({ page, visit }) => {
+    // Section 8 names zoom. Browser zoom is not scriptable, and CSS `zoom`
+    // reports misleading numbers — `clientWidth` stays in unzoomed units — so
+    // the equivalent is measured instead: 200% zoom on a 1280px screen leaves
+    // 640 CSS px, and 400% leaves 320, the WCAG reflow width.
+    for (const width of [640, 360, 320]) {
+      await page.setViewportSize({ width, height: 800 })
+      await visit('/mercado')
+
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      )
+      expect(overflow, `overflow horizontal em ${width}px`).toBeLessThanOrEqual(1)
+
+      await expect(page.locator('#market-search')).toBeVisible()
+      await expect(page.locator('#resultados article').first()).toBeVisible()
+    }
+  })
+
   test('o estado ativo do nav não depende só de cor', async ({ page, visit }) => {
     await visit('/mercado')
     const nav = await openMainNav(page)

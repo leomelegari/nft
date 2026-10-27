@@ -28,7 +28,7 @@ export function UserMenu({ currentHref }: { currentHref: string }) {
       <Link
         to="/entrar"
         search={currentHref === '/' ? {} : { redirect: currentHref }}
-        className="inline-flex h-[35px] items-center justify-center gap-1 rounded-md bg-primary px-4 text-body-lg font-medium text-primary-foreground transition-colors hover:bg-text-accent"
+        className="inline-flex h-[35px] shrink-0 items-center justify-center gap-1 rounded-md bg-primary px-3 text-body-lg font-medium text-primary-foreground transition-colors hover:bg-text-accent sm:px-4"
       >
         <LogoutIcon className="size-5" aria-hidden="true" />
         Entrar

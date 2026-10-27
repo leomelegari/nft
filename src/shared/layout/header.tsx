@@ -32,8 +32,14 @@ export function Header({
         withDivider && 'border-b border-border-soft',
       )}
     >
-      <div className="mx-auto flex h-16 w-full max-w-shell items-center justify-between gap-6 px-5 lg:h-[72px]">
-        <div className="flex items-center gap-4">
+      {/*
+        The gutters and gaps tighten below `sm`. At 320px — the WCAG reflow
+        width, which is also what 400% zoom leaves on a 1280px screen — the
+        wordmark, the two icons and the sign-in button overflowed the viewport
+        by 36px.
+      */}
+      <div className="mx-auto flex h-16 w-full max-w-shell items-center justify-between gap-3 px-3 sm:gap-6 sm:px-5 lg:h-[72px]">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <button
             type="button"
             ref={menuButtonRef}
@@ -94,7 +100,7 @@ export function Header({
           </ul>
         </nav>
 
-        <div className="flex items-center gap-5 lg:gap-7">
+        <div className="flex shrink-0 items-center gap-3 sm:gap-5 lg:gap-7">
           <button
             type="button"
             onClick={onOpenSearch}

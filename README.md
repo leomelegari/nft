@@ -29,16 +29,32 @@ limpo, com `npm install` e `npm run dev`.
 
 ```bash
 npm install
-cp .env.example .env
 npm run dev
 ```
 
 A aplicação sobe em `http://localhost:5173` com a camada de mocks ativa.
+
+O `.env` é **opcional**: os valores de `.env.example` são os mesmos padrões
+embutidos no código. Copie-o apenas para alterar algum deles:
+
+```bash
+cp .env.example .env
+```
+
 O Playwright precisa dos navegadores na primeira execução:
 
 ```bash
 npx playwright install chromium
 ```
+
+### Verificado em um checkout limpo
+
+`git clone` em diretório vazio seguido de `npm install` e `npm run build`
+concluem sem erro e **sem `.env`**; o `preview` resultante carrega o catálogo,
+conecta o Socket.IO e autentica com as credenciais abaixo. O `.npmrc` fixa
+`legacy-peer-deps=true` porque `@mswjs/socket.io-binding@0.2.0` declara peer
+`msw ^2`, enquanto o projeto usa MSW v3 — ver ARCHITECTURE, "Limitações do
+transporte".
 
 ## Variáveis de ambiente
 
@@ -190,6 +206,23 @@ cada execução em `lighthouse/reports/`.
 
 ## Documentação
 
-Contratos REST, eventos de tempo real, política de sessão, estado do carrinho,
-estratégia de cache, reconciliação entre REST e Socket.IO, limitações conhecidas
-e desvios do Figma estão em [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+Tudo em [`ARCHITECTURE.md`](./ARCHITECTURE.md). Mapa dos assuntos:
+
+| Assunto                                               | Onde |
+| ----------------------------------------------------- | ---- |
+| Contratos REST e taxonomia de erros                   | §4   |
+| Idempotência de pedidos                               | §5   |
+| Portão de cotação desatualizada                       | §6   |
+| Estratégia de cache, retries e isolamento por usuário | §7   |
+| Camada de mocks, cenários e reset                     | §8   |
+| Desvios do Figma e decisões de UX                     | §9   |
+| Política de sessão                                    | §9.1 |
+| Estado do carrinho                                    | §9.2 |
+| Checkout e idempotência                               | §9.3 |
+| Eventos de tempo real                                 | §9.4 |
+| Reconciliação entre REST e Socket.IO                  | §9.4 |
+| Limitações do transporte nos mocks                    | §9.4 |
+| Limitações conhecidas                                 | §10  |
+
+Auditoria de performance, com ambiente, versões e análise dos números, em
+[`lighthouse/RESULTS.md`](./lighthouse/RESULTS.md).

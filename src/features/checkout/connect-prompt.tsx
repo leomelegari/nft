@@ -41,14 +41,21 @@ export function ConnectPrompt({
         </DialogHeader>
 
         {wallet && (
-          <dl className="flex flex-col gap-2 text-body-md">
-            <div className="flex justify-between gap-3">
-              <dt className="text-text-secondary">Carteira</dt>
-              <dd className="truncate text-foreground">{wallet.label}</dd>
+          <dl className="flex min-w-0 flex-col gap-3 text-body-md">
+            <div className="flex min-w-0 justify-between gap-3">
+              <dt className="shrink-0 text-text-secondary">Carteira</dt>
+              <dd className="min-w-0 truncate text-foreground">{wallet.label}</dd>
             </div>
-            <div className="flex justify-between gap-3">
+            <div className="flex min-w-0 flex-col gap-1">
               <dt className="text-text-secondary">Endereço</dt>
-              <dd className="truncate text-foreground">{wallet.address}</dd>
+              {/*
+                Shown in full and allowed to wrap, not truncated: this is the
+                address the user is being asked to approve, and hiding half of
+                it defeats the point of asking.
+              */}
+              <dd className="font-mono text-caption-lg break-all text-foreground">
+                {wallet.address}
+              </dd>
             </div>
           </dl>
         )}

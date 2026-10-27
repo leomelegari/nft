@@ -410,6 +410,29 @@ outra pelo endereço.
 toca no avatar, então "Remover" precisava de rota própria — `avatar` é nulável no
 usuário.
 
+### Endereços longos e caixas que não encolhem
+
+Um endereço de carteira tem 42 caracteres sem ponto de quebra, e já estourou
+dois contêineres por motivos diferentes — vale registrar os dois, porque a
+causa nunca é o estilo do cartão.
+
+**`<fieldset>` no resumo do pagamento.** A folha de estilo do navegador dá
+`min-inline-size: min-content` ao `fieldset`, que então se recusava a encolher
+abaixo do endereço e crescia para 443px dentro de uma coluna de 405px.
+Corrigido com `min-w-0`.
+
+**`DialogContent` no modal de conectar carteira.** O painel é um `grid`, e um
+item de grid tem `min-width: auto`, que resolve para a largura de min-content:
+o endereço alargava a coluna implícita além do próprio `max-w` do diálogo e o
+botão "Aprovar conexão" ficava fora do painel. Corrigido no primitivo, com
+`grid-cols-[minmax(0,1fr)]`, para que valha para todos os diálogos.
+
+No modal, o endereço passou a ser exibido **por inteiro, quebrando em duas
+linhas**, em vez de truncado: é o endereço que o usuário está sendo convidado a
+aprovar, e esconder metade dele anula o sentido de perguntar. No resumo do
+pagamento, onde o endereço é informação secundária e o espaço é apertado, o
+truncamento continua.
+
 ### Galeria do detalhe
 
 O Figma mostra três miniaturas ao lado da arte principal. Existe **uma arte por

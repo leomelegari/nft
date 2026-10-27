@@ -1,4 +1,4 @@
-import { expect, openMainNav, test } from './support/fixtures'
+import { addFirstNftToCart, expect, openMainNav, test } from './support/fixtures'
 
 /** Flow 11 — keyboard operation, dialog focus and field-bound validation. */
 test.describe('acessibilidade', () => {
@@ -46,6 +46,36 @@ test.describe('acessibilidade', () => {
     await page.keyboard.press('Escape')
     await expect(dialog).toHaveCount(0)
     await expect(trigger).toBeFocused()
+  })
+
+  test('o diálogo da carteira não transborda do painel', async ({ page, signIn }) => {
+    await signIn()
+    await addFirstNftToCart(page)
+    await page.goto('/pagamento')
+    await page.waitForLoadState('networkidle')
+    await page.getByRole('button', { name: 'Conectar carteira' }).click()
+
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toBeVisible()
+
+    // The 42-character address used to widen the dialog's implicit grid
+    // column past its own max-width, pushing "Aprovar conexão" out of view.
+    expect(await dialog.evaluate((node) => node.scrollWidth > node.clientWidth)).toBe(
+      false,
+    )
+
+    const panel = (await dialog.boundingBox())!
+    const approve = (await page
+      .getByRole('button', { name: 'Aprovar conexão' })
+      .boundingBox())!
+
+    expect(approve.x).toBeGreaterThanOrEqual(panel.x)
+    expect(approve.x + approve.width).toBeLessThanOrEqual(panel.x + panel.width)
+
+    // The address is what is being approved, so all of it must be readable.
+    await expect(
+      dialog.getByText(/^0x[0-9a-f]{40}$/i).or(dialog.getByText(/0x8f2a/)),
+    ).toBeVisible()
   })
 
   test('erros de formulário são associados aos campos', async ({ page, visit }) => {

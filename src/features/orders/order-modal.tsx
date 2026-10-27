@@ -213,9 +213,45 @@ function ItemsTable({ order }: { order: Order }) {
   )
 }
 
+/**
+ * Totals.
+ *
+ * The file draws only "Taxa de rede" and "Total", which closes arithmetically
+ * for an order with no coupon. With one, it did not: the line items plus the
+ * fee visibly exceeded the total, and the discount that explained the gap was
+ * nowhere on the panel. Subtotal and the discount appear only when there *is*
+ * a discount, so an order without a coupon still renders the layout the design
+ * specifies.
+ */
 function Totals({ order }: { order: Order }) {
+  const hasDiscount = Number(order.discountEth) > 0
+
   return (
-    <dl className="ml-auto flex w-full max-w-[321px] flex-col gap-3">
+    <dl className="flex w-full flex-col justify-between gap-3">
+      {hasDiscount && (
+        <>
+          <div className="flex items-center justify-between gap-4">
+            <dt className="text-body-md text-foreground">Subtotal</dt>
+            <dd className="text-body-2xl text-foreground">
+              {formatEthExact(order.subtotalEth)}
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <dt className="min-w-0 text-body-md text-foreground">
+              Desconto
+              {order.coupon && (
+                <span className="ml-1.5 text-caption text-text-secondary">
+                  {order.coupon.code}
+                </span>
+              )}
+            </dt>
+            <dd className="text-body-2xl whitespace-nowrap text-success">
+              (-) {formatEthExact(order.discountEth)}
+            </dd>
+          </div>
+        </>
+      )}
+
       <div className="flex items-center justify-between gap-4">
         <dt className="text-body-md text-foreground">Taxa de rede</dt>
         <dd className="text-body-2xl text-foreground">
@@ -268,10 +304,6 @@ function OrderModalAction({ order, onClose }: { order: Order; onClose: () => voi
       >
         Ver no Etherscan
       </span>
-      <p className="text-center text-caption text-text-secondary">
-        Referência e link de exploração são simulados; nenhuma transação real foi
-        submetida a uma blockchain.
-      </p>
     </div>
   )
 }

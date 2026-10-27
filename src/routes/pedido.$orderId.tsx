@@ -143,10 +143,6 @@ function OrderPage() {
               <SummaryRow label="Rede" value={NETWORK_LABELS[order.wallet.network]} />
               <SummaryRow label="Endereço" value={order.wallet.address} truncate />
             </dl>
-            <p className="mt-3 text-caption text-text-secondary">
-              Referência e link de exploração são simulados; nenhuma transação real foi
-              submetida a uma blockchain.
-            </p>
           </section>
 
           <div className="flex flex-col gap-3">

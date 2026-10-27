@@ -54,7 +54,7 @@ export function Footer() {
               Antecipe-se ao próximo lançamento
             </h2>
             <NewsletterForm />
-            <p className="mt-3 text-caption-lg leading-[22px] text-text-secondary">
+            <p className="mt-3 max-w-[26ch] text-body leading-5.5 text-text-secondary">
               Receba lançamentos selecionados, histórias de criadores e novidades do
               mercado.
             </p>

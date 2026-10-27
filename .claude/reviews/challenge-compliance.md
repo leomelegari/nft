@@ -3,7 +3,8 @@
 **Revisado**: 2026-10-27
 **Enunciado**: confirmado idêntico ao de 2026-10-26 (262 linhas, `main`)
 **Escopo**: repositório completo
-**Decisão**: APROVADO com uma pendência externa — falta a **URL pública do deploy**
+**Decisão**: APROVADO — deploy publicado e validado em
+<https://nft-liart-theta.vercel.app>
 
 ## Validação
 
@@ -95,14 +96,18 @@ Os doze fluxos cobertos, mais regressão visual de sete telas com baselines
 versionadas. Relatório HTML e traces/vídeos nas falhas configurados. Cada teste
 parte de contexto novo — banco, sessão e cenário vivem em `localStorage`.
 
-### 10. Performance e Lighthouse — Parcial, justificado
+### 10. Performance e Lighthouse — OK
 
-Acessibilidade 100, boas práticas 100, SEO 92 nos dois perfis. Performance 99
-no desktop e **85 no mobile (meta 90)**. Causa identificada e registrada em
-`lighthouse/ANALYSIS.md`: o caminho crítico, não trabalho em tela (TBT 40ms,
-CLS 0) — o maior recurso é o worker do MSW com 160KB, que o enunciado exige no
-build de demonstração. O enunciado pede justificativa para resultados abaixo
-da meta, e ela está lá.
+Auditado contra o build publicado, que é o artefato avaliado. **Todas as
+categorias atingem a meta nos dois perfis**: performance 93/95 no mobile e 100
+no desktop, acessibilidade 100, boas práticas 100, SEO 92. CLS 0 em todos os
+alvos, TBT entre 0 e 60ms.
+
+A mesma auditoria contra `npm run preview` dá 85 no mobile. É o mesmo bundle: a
+diferença é o servidor — sem compressão e em HTTP/1.1 localmente, com Brotli e
+HTTP/2 no deploy —, o que custa cerca de um segundo de LCP sob a emulação
+mobile. Registrado em `lighthouse/ANALYSIS.md` para que a diferença não pareça
+inconsistência de método.
 
 ### 11. Critérios eliminatórios — nenhum presente
 
@@ -115,7 +120,7 @@ da meta, e ela está lá.
 | Eventos simulados direto na UI | Passam por `socket.io-client` |
 | Ausência de testes E2E executáveis | 149 passando |
 
-### 12. Entrega — pendente apenas a URL
+### 12. Entrega — OK
 
 Código, lockfile, assets, mocks, fixtures, testes e configuração de auditoria
 entregues. `.npmrc` fixa `legacy-peer-deps` para `npm install` funcionar num
@@ -123,9 +128,19 @@ checkout limpo. README com setup, variáveis, credenciais, cenários, reset,
 comandos e reprodução dos fluxos de falha. ARCHITECTURE com contratos, eventos,
 sessão, carrinho, cache e reconciliação.
 
-**Pendência**: `**Aplicação publicada**: _(preencher com a URL do deploy)_` —
-o deploy é obrigatório e só o autor pode publicá-lo. `vercel.json` já está
-configurado (rewrites de SPA, headers do service worker).
+**Deploy validado** em <https://nft-liart-theta.vercel.app>, com a suíte
+funcional rodada contra o site publicado:
+
+| Verificação no ambiente publicado | Resultado |
+| --- | --- |
+| Acesso direto a 7 rotas | todas HTTP 200 (rewrite de SPA) |
+| Headers do service worker | `no-cache` + `Service-Worker-Allowed: /` |
+| Catálogo e mocks | 12 cards servidos pelo MSW |
+| Socket.IO | 1 subscriber conectado |
+| Refresh com estado na URL | `?q=&view=&pageSize=` preservados |
+| Compra completa com cupom | modal pendente em 2,6s → confirmado em 4,4s, totais corretos |
+| Refresh no recibo | pedido mantido, sem duplicar |
+| Erros de console | nenhum |
 
 ## Corrigido nesta revisão
 

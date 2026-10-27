@@ -3,7 +3,7 @@
 Implementação do desafio frontend: um marketplace de NFTs em React + TypeScript,
 com backend inteiramente simulado — REST via MSW e tempo real via Socket.IO.
 
-**Aplicação publicada**: _(preencher com a URL do deploy)_
+**Aplicação publicada**: <https://nft-liart-theta.vercel.app>
 
 Não há backend real nem serviço privado: a entrega roda a partir de um checkout
 limpo, com `npm install` e `npm run dev`.
@@ -192,6 +192,14 @@ npx playwright test visual --update-snapshots
 
 ## Auditoria Lighthouse
 
+A auditoria versionada é a do **build publicado**, que é o artefato avaliado:
+
+```bash
+LIGHTHOUSE_URL=https://nft-liart-theta.vercel.app npm run lighthouse
+```
+
+Para auditar localmente, suba o build e rode sem a variável:
+
 ```bash
 npm run build
 npm run preview &
@@ -199,10 +207,23 @@ npm run lighthouse
 ```
 
 Audita início e detalhe do NFT nos perfis mobile e desktop, três execuções cada,
-e publica a mediana por categoria. Resultados, ambiente, versões das ferramentas
-e a análise dos números em [`lighthouse/RESULTS.md`](./lighthouse/RESULTS.md);
-configuração versionada em `lighthouse/config.mjs`; relatórios HTML e JSON de
-cada execução em `lighthouse/reports/`.
+e publica a mediana por categoria.
+
+| Página  | Perfil  | Performance | Acessibilidade | Boas práticas | SEO |
+| ------- | ------- | ----------: | -------------: | ------------: | --: |
+| Início  | Mobile  |          93 |            100 |           100 |  92 |
+| Início  | Desktop |         100 |            100 |           100 |  92 |
+| Detalhe | Mobile  |          95 |            100 |           100 |  92 |
+| Detalhe | Desktop |         100 |            100 |           100 |  92 |
+
+Metas: performance ≥ 90, acessibilidade ≥ 95, boas práticas ≥ 95, SEO ≥ 90.
+
+A mesma auditoria contra `npm run preview` dá 85 no mobile — é o mesmo bundle,
+servido sem compressão e por HTTP/1.1. A diferença está analisada em
+[`lighthouse/RESULTS.md`](./lighthouse/RESULTS.md), junto com ambiente, versões
+das ferramentas e LCP/CLS/TBT; configuração versionada em
+`lighthouse/config.mjs`; relatórios HTML e JSON de cada execução em
+`lighthouse/reports/`.
 
 ## Documentação
 

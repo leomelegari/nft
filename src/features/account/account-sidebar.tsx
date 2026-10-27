@@ -44,7 +44,7 @@ export function AccountSidebar() {
             onSettled: () => void navigate({ to: '/', replace: true }),
           })
         }
-        className="flex h-10 items-center gap-2 px-4 text-left text-body-md font-bold text-text-accent transition-colors hover:bg-secondary focus-visible:outline-ring disabled:opacity-60"
+        className="flex h-10 items-center gap-3 px-6 text-left text-body-md font-bold text-text-accent transition-colors hover:bg-secondary focus-visible:outline-ring disabled:opacity-60"
       >
         <IconBox>
           <LogoutIcon aria-hidden="true" />

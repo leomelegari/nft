@@ -9,6 +9,7 @@ import {
   type NftSort,
   type NftTab,
 } from '@/entities/nft'
+import { ETH_AMOUNT_PATTERN } from '@/shared/money'
 
 /**
  * Catalog state lives in the URL, not in component state.
@@ -45,12 +46,40 @@ export function csv<T extends string>(allowed: readonly T[]) {
     .transform((list) => (list && list.length > 0 ? list : undefined))
 }
 
+/**
+ * A text param the router may have already turned into a number.
+ *
+ * `parseSearch` runs `JSON.parse`, while `stringifySearch` writes plain
+ * strings unquoted — so `?q=395` is read back as the number 395 and
+ * `?minPrice=5` as 5. `z.string()` rejected both and `.catch(undefined)`
+ * swallowed them without a trace: searching for "395" silently returned the
+ * whole catalog, and a price filter appeared in the URL and changed nothing.
+ *
+ * Writing them quoted would round-trip, but `?q=%22395%22` is not a URL
+ * anyone wants to read or hand-edit, and readable URLs are the point. So the
+ * schema accepts what the address actually carries and normalises it back.
+ */
+function textParam() {
+  return z.union([z.string(), z.number()]).transform((value) => String(value))
+}
+
+/** A price bound: a decimal string, however `JSON.parse` delivered it. */
+const priceParam = textParam()
+  .transform((value) => value.trim())
+  .refine((value) => ETH_AMOUNT_PATTERN.test(value))
+  .optional()
+  .catch(undefined)
+
 export const catalogSearchSchema = z.object({
-  q: z.string().trim().max(80).optional().catch(undefined),
+  q: textParam()
+    .transform((value) => value.trim())
+    .refine((value) => value.length <= 80)
+    .optional()
+    .catch(undefined),
   collection: csv(COLLECTION_SLUGS).catch(undefined),
   network: csv(NETWORKS).catch(undefined),
-  minPrice: z.string().optional().catch(undefined),
-  maxPrice: z.string().optional().catch(undefined),
+  minPrice: priceParam,
+  maxPrice: priceParam,
   tab: z.enum(NFT_TABS).optional().catch(undefined),
   sort: z.enum(NFT_SORTS).optional().catch(undefined),
   page: z.coerce.number().int().positive().optional().catch(undefined),

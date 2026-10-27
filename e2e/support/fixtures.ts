@@ -180,3 +180,20 @@ export async function openMainNav(page: Page) {
   await expect(drawer).toBeVisible()
   return drawer
 }
+
+/**
+ * The home catalog's filter panel, wherever it lives at this viewport.
+ *
+ * Desktop keeps it in a 310px sidebar; below `lg` the same panel is behind the
+ * "Filtros" drawer. Returning the open one lets a single filtering test be
+ * honest on both projects instead of silently skipping mobile.
+ */
+export async function openCatalogFilters(page: Page) {
+  const sidebar = page.locator('#catalog-desktop-price-min')
+  if (await sidebar.isVisible()) return { scope: page, idPrefix: 'catalog-desktop' }
+
+  await page.getByRole('button', { name: /^Filtros/ }).click()
+  const drawer = page.getByRole('dialog')
+  await expect(drawer).toBeVisible()
+  return { scope: drawer, idPrefix: 'catalog-mobile' }
+}

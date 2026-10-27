@@ -1,5 +1,6 @@
 import {
   addFirstNftToCart,
+  dismissOrderModal,
   expect,
   reachConfirmableCheckout,
   test,
@@ -16,7 +17,10 @@ test.describe('falhas no pagamento', () => {
     await reachConfirmableCheckout(page)
     await page.getByRole('button', { name: 'Confirmar compra' }).click()
 
-    await expect(page.getByText('Pagamento recusado')).toBeVisible({ timeout: 25_000 })
+    await expect(page.getByText('Pagamento recusado').first()).toBeVisible({
+      timeout: 25_000,
+    })
+    await dismissOrderModal(page)
 
     // Nothing was bought, so nothing may leave the basket.
     await page.goto('/carrinho')

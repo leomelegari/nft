@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import {
   ORDER_STATUS_LABELS,
@@ -13,6 +14,7 @@ import { queryKeys } from '@/shared/api/query-keys'
 import { requireAuth } from '@/features/auth/guard'
 import { fetchOrder } from '@/features/orders/api'
 import { useOrderQuery } from '@/features/orders/queries'
+import { OrderModal } from '@/features/orders/order-modal'
 import { Artwork } from '@/shared/ui/artwork'
 import { Button } from '@/shared/ui/button'
 import { SkeletonBlock, SkeletonGroup } from '@/shared/ui/skeleton-primitives'
@@ -52,11 +54,21 @@ function OrderPage() {
   const { orderId } = Route.useParams()
   const { data: order, isPending } = useOrderQuery(orderId)
 
+  /**
+   * The outcome modal opens as soon as the order exists, while it is still
+   * pending, and then follows it to its terminal state. Dismissing it is
+   * remembered: a reader who closed it to look at the receipt should not have
+   * it thrown back in their face when the settlement lands.
+   */
+  const [modalOpen, setModalOpen] = useState(true)
+
   if (isPending || !order) return <OrderPending />
 
   return (
     <div className="mx-auto flex w-full max-w-shell flex-col gap-8 px-5 py-6 lg:py-8">
       <h1 className="sr-only">Pedido {order.reference}</h1>
+
+      <OrderModal order={order} open={modalOpen} onOpenChange={setModalOpen} />
 
       <StatusBanner order={order} />
 

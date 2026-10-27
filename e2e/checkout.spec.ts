@@ -1,5 +1,6 @@
 import {
   addFirstNftToCart,
+  dismissOrderModal,
   expect,
   reachConfirmableCheckout,
   test,
@@ -18,7 +19,14 @@ test.describe('compra completa', () => {
 
     await expect(page).toHaveURL(/\/pedido\//)
     await expect(page.getByText('Compra confirmada')).toBeVisible({ timeout: 20_000 })
-    await expect(page.getByText(title).first()).toBeVisible()
+
+    // The outcome modal covers the receipt until it is dismissed.
+    await dismissOrderModal(page)
+
+    // Scoped to the receipt's own items list: the modal renders the same
+    // title, so an unscoped match can resolve to the panel on its way out.
+    const items = page.locator('section').filter({ hasText: 'Itens do pedido' })
+    await expect(items.getByText(title)).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Transação' })).toBeVisible()
 
     // The purchased line leaves the cart.
@@ -38,6 +46,7 @@ test.describe('compra completa', () => {
     await page.getByRole('button', { name: 'Confirmar compra' }).click()
 
     await expect(page.getByText('Compra confirmada')).toBeVisible({ timeout: 20_000 })
+    await dismissOrderModal(page)
     const receiptUrl = page.url()
     const total = await page.getByText(/ETH/).last().innerText()
 
@@ -50,6 +59,7 @@ test.describe('compra completa', () => {
 
     await page.goto(receiptUrl)
     await page.waitForLoadState('networkidle')
+    await dismissOrderModal(page)
     await expect(page.getByText(/ETH/).last()).toHaveText(total)
   })
 
@@ -61,6 +71,7 @@ test.describe('compra completa', () => {
     await expect(page.getByText('Compra confirmada')).toBeVisible({ timeout: 20_000 })
     const receiptUrl = page.url()
 
+    await dismissOrderModal(page)
     await page.getByRole('banner').getByRole('button').last().click()
     await page.getByRole('button', { name: /Sair da conta/ }).click()
     await expect(page).toHaveURL('/')

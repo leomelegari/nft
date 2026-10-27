@@ -1,5 +1,6 @@
 import {
   addFirstNftToCart,
+  dismissOrderModal,
   expect,
   reachConfirmableCheckout,
   test,
@@ -101,7 +102,9 @@ test.describe('tempo real', () => {
     await page.waitForLoadState('networkidle')
     expect(page.url()).toBe(receipt)
 
-    await expect(page.getByText('Pagamento recusado')).toBeVisible({ timeout: 25_000 })
+    await expect(page.getByText('Pagamento recusado').first()).toBeVisible({
+      timeout: 25_000,
+    })
 
     const orders = await page.evaluate(() =>
       fetch('/api/orders', {

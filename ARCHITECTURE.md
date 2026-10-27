@@ -410,6 +410,26 @@ outra pelo endereço.
 toca no avatar, então "Remover" precisava de rota própria — `avatar` é nulável no
 usuário.
 
+### Params numéricos no estado da URL
+
+`parseSearch` roda `JSON.parse`, enquanto `stringifySearch` escreve strings
+simples sem aspas. A ida e a volta, portanto, não eram simétricas para
+qualquer valor que _pareça_ JSON: `?q=395` voltava como o **número** 395 e
+`?minPrice=5` como 5. O `z.string()` rejeitava os dois e o `.catch(undefined)`
+engolia sem deixar rastro.
+
+O efeito era silencioso e enganoso: buscar por "395" devolvia o catálogo
+inteiro, e a faixa de preço aparecia na URL sem filtrar nada — nem uma
+requisição era disparada, porque o estado resolvido não mudava. Só termos que
+não são JSON válido funcionavam; `?q=051` passava por causa do zero à esquerda.
+
+Escrever os valores com aspas resolveria a simetria, mas `?q=%22395%22` não é
+uma URL que alguém queira ler ou editar à mão — e URLs legíveis são o ponto da
+seção 3. O schema passou a aceitar o que o endereço de fato carrega
+(`string | number`) e normalizar de volta para string. As faixas de preço ainda
+são validadas contra `ETH_AMOUNT_PATTERN`, então `?minPrice=abc` é descartado
+em vez de ir para a API e zerar o catálogo.
+
 ### Endereços longos e caixas que não encolhem
 
 Um endereço de carteira tem 42 caracteres sem ponto de quebra, e já estourou

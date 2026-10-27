@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { expect, firstCard, test } from './support/fixtures'
+import { expect, firstCard, openCatalogFilters, test } from './support/fixtures'
 
 /** Prices as rendered on the cards, in document order. */
 async function ascendingPrices(page: Page): Promise<boolean> {
@@ -84,6 +84,54 @@ test.describe('catálogo', () => {
     await expect(page).toHaveURL(/tab=trending/)
     await expect(page).not.toHaveURL(/pageSize=24/)
     await expect(page.locator('#market-page-size')).toHaveValue('12')
+  })
+
+  test('faixa de preço filtra de verdade e sobrevive a refresh', async ({
+    page,
+    visit,
+  }) => {
+    await visit('/')
+    const total = page.locator('p[role=status][aria-live=polite]').first()
+    const before = Number((await total.innerText()).replace(/\D/g, ''))
+
+    const filters = await openCatalogFilters(page)
+    await filters.scope.locator(`#${filters.idPrefix}-price-min`).fill('5')
+    await filters.scope.getByRole('button', { name: 'Aplicar' }).click()
+
+    await expect(page).toHaveURL(/minPrice=5/)
+    // The URL changing is not the claim; the result set changing is.
+    await expect
+      .poll(async () => Number((await total.innerText()).replace(/\D/g, '')))
+      .toBeLessThan(before)
+
+    const prices = await page.locator('#catalogo article p.font-bold').allInnerTexts()
+    for (const price of prices) {
+      expect(Number(price.replace(/[^\d.]/g, ''))).toBeGreaterThanOrEqual(5)
+    }
+
+    const narrowed = await total.innerText()
+    await page.reload()
+    await expect(total).toHaveText(narrowed)
+  })
+
+  test('busca por um termo numérico não é descartada', async ({ page, visit }) => {
+    // `parseSearch` runs JSON.parse, so "395" arrives as a number; it used to
+    // fail `z.string()` and be swallowed, returning the whole catalog.
+    await visit('/mercado?q=395')
+
+    await expect(page.locator('#market-search')).toHaveValue('395')
+    const total = page.locator('p[role=status][aria-live=polite]').first()
+    await expect
+      .poll(async () => Number((await total.innerText()).replace(/\D/g, '')))
+      .toBeLessThan(239)
+  })
+
+  test('preço inválido na URL é ignorado em vez de zerar o catálogo', async ({
+    page,
+    visit,
+  }) => {
+    await visit('/?minPrice=abc')
+    await expect(page.locator('#catalogo article').first()).toBeVisible()
   })
 
   test('resultado vazio é tratado', async ({ page, visit }) => {

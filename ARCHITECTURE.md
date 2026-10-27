@@ -410,6 +410,32 @@ outra pelo endereço.
 toca no avatar, então "Remover" precisava de rota própria — `avatar` é nulável no
 usuário.
 
+### Modal de conclusão do pedido
+
+O frame 11-4385 desenha a confirmação como um modal sobre a tela de pagamento.
+Ele abre assim que o pedido existe — ainda `pending` — e acompanha o desfecho:
+mudam a ilustração, o título e a ação de fechamento; o recibo abaixo não.
+
+A ordem é deliberada. O snapshot do pedido já é final no momento da criação;
+só o desfecho ainda é desconhecido. Re-renderizar o painel inteiro na
+liquidação sugeriria que os números também mudaram.
+
+O Figma desenha apenas o estado confirmado. Os outros dois ocupam o mesmo slot
+de 80px e usam as cores de status que o projeto já tem, em vez de inventar uma
+segunda linguagem visual: `pending` traz um anel girando (desligado sob
+`prefers-reduced-motion`) e `declined` um triângulo de alerta com o motivo
+devolvido pela API.
+
+Fechar não é beco sem saída: a página do recibo está atrás com a mesma
+informação. E o fechamento é lembrado — quem fechou para ler o recibo não tem o
+painel jogado de volta na cara quando a liquidação chega.
+
+**"Ver no Etherscan" é inerte.** A referência e a URL de exploração são
+simuladas (seção 5 do enunciado), e um botão que navega para um endereço que
+não resolve é exatamente o "aparentar sucesso funcional" que o enunciado
+proíbe. O botão é mantido pela fidelidade ao design, com a nota de simulação
+logo abaixo — a mesma regra dos links do rodapé.
+
 ### Params numéricos no estado da URL
 
 `parseSearch` roda `JSON.parse`, enquanto `stringifySearch` escreve strings

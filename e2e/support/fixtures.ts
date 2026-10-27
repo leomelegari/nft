@@ -197,3 +197,17 @@ export async function openCatalogFilters(page: Page) {
   await expect(drawer).toBeVisible()
   return { scope: drawer, idPrefix: 'catalog-mobile' }
 }
+
+/**
+ * Closes the order outcome modal if it is open.
+ *
+ * It opens over the receipt as soon as an order exists, so anything that wants
+ * the page underneath has to dismiss it first — exactly as a reader would.
+ */
+export async function dismissOrderModal(page: Page): Promise<void> {
+  const dialog = page.getByRole('dialog')
+  if ((await dialog.count()) === 0) return
+
+  await page.keyboard.press('Escape')
+  await expect(dialog).toHaveCount(0)
+}

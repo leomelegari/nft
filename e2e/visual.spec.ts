@@ -67,6 +67,15 @@ test.describe('regressão visual', () => {
     await expect(page).toHaveScreenshot('perfil.png', { fullPage: true })
   })
 
+  test('lista de interesse', async ({ page, visit, signIn }) => {
+    await signIn()
+    await visit('/lista-de-interesse')
+    await expect(
+      page.getByRole('heading', { name: 'Lista de interesse', level: 1 }),
+    ).toBeVisible()
+    await expect(page).toHaveScreenshot('lista-de-interesse.png', { fullPage: true })
+  })
+
   test('carteiras', async ({ page, visit, signIn }) => {
     await signIn()
     await visit('/carteiras')

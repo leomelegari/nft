@@ -31,32 +31,55 @@ export const FOOTER_HIGHLIGHTS = [
   },
 ] as const
 
-export const FOOTER_COLUMNS = [
+/**
+ * A footer link is inert unless it has somewhere real to go.
+ *
+ * Most of these destinations are outside the delivery and stay as plain text,
+ * which is what keeps them from looking functional. The three that do exist
+ * are linked — leaving "Lista de interesse" dead here while the same item
+ * works in the account sidebar would be the kind of inconsistency the rule is
+ * meant to prevent.
+ */
+export interface FooterLink {
+  label: string
+  to?: '/perfil' | '/carteiras' | '/lista-de-interesse'
+}
+
+export const FOOTER_COLUMNS: ReadonlyArray<{
+  title: string
+  links: readonly FooterLink[]
+}> = [
   {
     title: 'Meu perfil',
     links: [
-      'Meu perfil',
-      'Minha coleção',
-      'Atividade',
-      'Estúdio do criador',
-      'Lista de interesse',
+      { label: 'Meu perfil', to: '/perfil' },
+      { label: 'Minha coleção' },
+      { label: 'Atividade' },
+      { label: 'Estúdio do criador' },
+      { label: 'Lista de interesse', to: '/lista-de-interesse' },
     ],
   },
   {
     title: 'Central de ajuda',
     links: [
-      'Central de ajuda',
-      'Como comprar NFTs',
-      'Carteira e segurança',
-      'Política do mercado',
-      'Denunciar item',
+      { label: 'Central de ajuda' },
+      { label: 'Como comprar NFTs' },
+      { label: 'Carteira e segurança' },
+      { label: 'Política do mercado' },
+      { label: 'Denunciar item' },
     ],
   },
   {
     title: 'Coleções',
-    links: ['Arte digital', 'Fotografia', 'Música', 'Arte 3D', 'Utilidade'],
+    links: [
+      { label: 'Arte digital' },
+      { label: 'Fotografia' },
+      { label: 'Música' },
+      { label: 'Arte 3D' },
+      { label: 'Utilidade' },
+    ],
   },
-] as const
+]
 
 export const FOOTER_SOCIALS = [
   { label: 'Facebook', Icon: FacebookIcon },

@@ -14,6 +14,7 @@ import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as CarteirasRouteImport } from './routes/carteiras'
 import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as ListaDeInteresseRouteImport } from './routes/lista-de-interesse'
 import { Route as MercadoRouteImport } from './routes/mercado'
 import { Route as PagamentoRouteImport } from './routes/pagamento'
 import { Route as PerfilRouteImport } from './routes/perfil'
@@ -43,6 +44,11 @@ const CarteirasRoute = CarteirasRouteImport.update({
 const EntrarRoute = EntrarRouteImport.update({
   id: '/entrar',
   path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListaDeInteresseRoute = ListaDeInteresseRouteImport.update({
+  id: '/lista-de-interesse',
+  path: '/lista-de-interesse',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MercadoRoute = MercadoRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/carrinho': typeof CarrinhoRoute
   '/carteiras': typeof CarteirasRoute
   '/entrar': typeof EntrarRoute
+  '/lista-de-interesse': typeof ListaDeInteresseRoute
   '/mercado': typeof MercadoRoute
   '/pagamento': typeof PagamentoRoute
   '/perfil': typeof PerfilRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/carrinho': typeof CarrinhoRoute
   '/carteiras': typeof CarteirasRoute
   '/entrar': typeof EntrarRoute
+  '/lista-de-interesse': typeof ListaDeInteresseRoute
   '/mercado': typeof MercadoRoute
   '/pagamento': typeof PagamentoRoute
   '/perfil': typeof PerfilRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/carrinho': typeof CarrinhoRoute
   '/carteiras': typeof CarteirasRoute
   '/entrar': typeof EntrarRoute
+  '/lista-de-interesse': typeof ListaDeInteresseRoute
   '/mercado': typeof MercadoRoute
   '/pagamento': typeof PagamentoRoute
   '/perfil': typeof PerfilRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/carteiras'
     | '/entrar'
+    | '/lista-de-interesse'
     | '/mercado'
     | '/pagamento'
     | '/perfil'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/carteiras'
     | '/entrar'
+    | '/lista-de-interesse'
     | '/mercado'
     | '/pagamento'
     | '/perfil'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/carteiras'
     | '/entrar'
+    | '/lista-de-interesse'
     | '/mercado'
     | '/pagamento'
     | '/perfil'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   CarrinhoRoute: typeof CarrinhoRoute
   CarteirasRoute: typeof CarteirasRoute
   EntrarRoute: typeof EntrarRoute
+  ListaDeInteresseRoute: typeof ListaDeInteresseRoute
   MercadoRoute: typeof MercadoRoute
   PagamentoRoute: typeof PagamentoRoute
   PerfilRoute: typeof PerfilRoute
@@ -195,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/entrar'
       fullPath: '/entrar'
       preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lista-de-interesse': {
+      id: '/lista-de-interesse'
+      path: '/lista-de-interesse'
+      fullPath: '/lista-de-interesse'
+      preLoaderRoute: typeof ListaDeInteresseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mercado': {
@@ -241,6 +261,7 @@ const rootRouteChildren: RootRouteChildren = {
   CarrinhoRoute: CarrinhoRoute,
   CarteirasRoute: CarteirasRoute,
   EntrarRoute: EntrarRoute,
+  ListaDeInteresseRoute: ListaDeInteresseRoute,
   MercadoRoute: MercadoRoute,
   PagamentoRoute: PagamentoRoute,
   PerfilRoute: PerfilRoute,

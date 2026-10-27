@@ -354,13 +354,32 @@ frequentemente não é anunciada.
 
 ### Perfil do colecionador e Carteiras
 
-As duas telas compartilham a sidebar de conta do Figma. Dos oito destinos, só
-"Dados do perfil" e "Carteiras" existem no escopo; "Atividade", "Lista de
-interesse", "Ofertas", "Arquivos baixados" e "Suporte" não têm tela no arquivo
-nem endpoint atrás. São renderizados — sem eles a sidebar não representaria o
-design — mas inertes com `aria-disabled`, a mesma regra aplicada a "Criadores" e
-"Aprenda" no nav principal. O item atual é marcado pela régua de 6px à esquerda,
-não por cor, e é o único com `aria-current`.
+As telas da conta compartilham a sidebar do Figma. Dos oito destinos, três
+existem: "Dados do perfil", "Carteiras" e "Lista de interesse".
+
+"Atividade", "Ofertas", "Arquivos baixados" e "Suporte" são **nomeados pelo
+enunciado** como fora da entrega ("Páginas editoriais, suporte, atividade,
+ofertas e downloads não fazem parte da entrega"), não têm frame no Figma e não
+têm endpoint. São renderizados — sem eles a sidebar não representaria o design
+— mas inertes com `aria-disabled`, a mesma regra aplicada a "Criadores" e
+"Aprenda" no nav principal, que caem em "páginas editoriais". O item atual é
+marcado pela régua de 6px à esquerda, não por cor, e é o único com
+`aria-current`.
+
+**"Lista de interesse" foi implementada.** Era o único item da sidebar que o
+enunciado não exclui nominalmente, e corresponde aos favoritos — que o
+enunciado _exige_ que persistam para o usuário autenticado. O coração já
+existia em cada card e no detalhe, mas não havia onde ver o que fora salvo;
+guardar NFTs sem tela para consultá-los era a única incoerência real da lista.
+A tela reusa a query de favoritos existente, mantém o coração em cada card
+(remover da lista é o mesmo gesto, otimista) e tem estado vazio próprio — o
+"Nenhum NFT encontrado" do catálogo estaria errado aqui, porque nada foi
+buscado.
+
+Pela mesma razão, os links do rodapé que **têm** destino real ("Meu perfil" e
+"Lista de interesse") passaram a ser links de verdade. O restante continua
+inerte: a regra é não aparentar função onde não há, não transformar tudo em
+texto morto.
 
 **Campos do perfil.** O Figma pede "Nome de exibição", "Nome de usuário",
 "E-mail", "Nome ENS", "Apelido da carteira" e Avatar. Destes, "Nome de usuário"

@@ -78,7 +78,12 @@ function NftDetailPage() {
         </ol>
       </nav>
 
-      <div className="grid gap-8 lg:grid-cols-[573px_minmax(0,1fr)]">
+      {/*
+        `items-start`: without it the two columns share the taller one's
+        height, so anything that grows the right-hand panel — the "added to
+        cart" line, a validation message — stretched the gallery with it.
+      */}
+      <div className="grid items-start gap-8 lg:grid-cols-[573px_minmax(0,1fr)]">
         <NftGallery images={nft.gallery} title={nft.title} />
 
         <div className="flex min-w-0 flex-col gap-6">

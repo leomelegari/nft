@@ -49,6 +49,52 @@ test.describe('detalhe do NFT', () => {
     await expect(output).toHaveText(String(cap))
   })
 
+  test('a galeria não repete a mesma arte', async ({ page, visit }) => {
+    await visit('/mercado')
+    await firstCard(page).locator('h3 a').click()
+    // `/mercado` has an `h1` of its own, so wait for the route, not a heading.
+    await page.waitForURL(/\/nft\//)
+    await page.waitForLoadState('networkidle')
+
+    const base = (src: string | null) => src?.replace(/-\d+\.webp$/, '') ?? ''
+
+    // One artwork means one thumbnail, not three identical ones, and no
+    // tablist — a set of identical choices is not a choice.
+    const rail = page.locator('main .size-\\[100px\\] img')
+    await expect(rail).toHaveCount(1)
+    await expect(page.getByRole('tab')).toHaveCount(0)
+
+    const main = page.locator('main img[sizes*="450px"]').first()
+    expect(base(await rail.first().getAttribute('src'))).toBe(
+      base(await main.getAttribute('src')),
+    )
+  })
+
+  test('adicionar ao carrinho não redimensiona a arte', async ({
+    page,
+    visit,
+    signIn,
+  }) => {
+    await signIn()
+    await visit('/mercado')
+    await firstCard(page).locator('h3 a').click()
+    await page.waitForURL(/\/nft\//)
+    await page.waitForLoadState('networkidle')
+
+    const artwork = page.locator('main img[sizes*="450px"]').first()
+    const before = await artwork.boundingBox()
+
+    // Square, not cropped: `Artwork` ships `h-full`, which used to win.
+    expect(Math.round(before!.width)).toBe(Math.round(before!.height))
+
+    await page.getByRole('button', { name: 'COMPRAR' }).click()
+    await expect(page.getByText(/adicionada ao carrinho/i)).toBeVisible()
+
+    const after = await artwork.boundingBox()
+    expect(Math.round(after!.width)).toBe(Math.round(before!.width))
+    expect(Math.round(after!.height)).toBe(Math.round(before!.height))
+  })
+
   test('a edição esgotada desabilita a compra', async ({ page, visit, mocks }) => {
     await visit('/mercado')
     const href = await firstCard(page).locator('h3 a').getAttribute('href')

@@ -410,6 +410,28 @@ outra pelo endereço.
 toca no avatar, então "Remover" precisava de rota própria — `avatar` é nulável no
 usuário.
 
+### Galeria do detalhe
+
+O Figma mostra três miniaturas ao lado da arte principal. Existe **uma arte por
+NFT**: o fixture publicava o mesmo `src` três vezes, com textos alternativos
+que descreviam ângulos inexistentes ("detalhe da composição", "variação
+cromática"). Além de repetir a mesma imagem na tela, isso anunciava a um leitor
+de tela duas imagens que nunca foram produzidas.
+
+O fixture passou a publicar uma entrada só. A galeria mantém a régua lateral do
+design com uma miniatura, mas não como aba: um botão que não muda nada é
+controle só no nome, e duplicaria para a tecnologia assistiva o que a imagem
+principal já diz — por isso é `aria-hidden`. Com mais de uma arte, o tablist
+completo (setas, `aria-selected`) volta a funcionar; o componente não perdeu a
+capacidade, só deixou de fingir.
+
+A arte principal ganhou `h-auto`. O `Artwork` embarca `h-full`, então sempre
+que a coluna era esticada por uma vizinha mais alta a imagem crescia junto:
+adicionar ao carrinho a fazia pular 46px e, pior, ela nunca era quadrada —
+`object-cover` vinha recortando a peça silenciosamente. A grade do detalhe
+também recebeu `items-start`, para que as duas colunas parem de compartilhar a
+altura da mais alta.
+
 ### Navegação mobile
 
 O frame mobile usa uma barra de abas inferior com um botão flutuante central

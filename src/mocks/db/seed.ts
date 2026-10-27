@@ -8,7 +8,8 @@ import { toEth } from '@/shared/money'
 import { createRandom } from '@/mocks/db/random'
 import type { MockDb, MockNft, MockUser } from '@/mocks/db/types'
 
-export const DB_SCHEMA_VERSION = 1
+// 2: the gallery stopped publishing one artwork three times.
+export const DB_SCHEMA_VERSION = 2
 export const DEFAULT_SEED = 20260426
 
 /**
@@ -166,11 +167,16 @@ function buildNfts(seed: number): MockNft[] {
           `${title} integra a coleção ${COLLECTION_LABELS[collection]} com curadoria da Kurio. ` +
           'A peça é emitida on-chain com metadados imutáveis e procedência verificável, ' +
           'acompanhada de licença de uso pessoal para o colecionador.',
-        gallery: [
-          { src: artwork, alt: `Arte digital "${title}" de ${creator.name}` },
-          { src: artwork, alt: `Detalhe da composição de "${title}"` },
-          { src: artwork, alt: `Variação cromática de "${title}"` },
-        ],
+        /**
+         * One entry, because there is one artwork.
+         *
+         * This used to publish the same `src` three times under three
+         * different alt texts — "detalhe da composição", "variação
+         * cromática" — describing views that do not exist. The gallery then
+         * rendered three identical thumbnails, and a screen reader was told
+         * about two images that were never produced.
+         */
+        gallery: [{ src: artwork, alt: `Arte digital "${title}" de ${creator.name}` }],
         creator: { ...creator, avatar: `/avatars/creator-${(index % 6) + 1}.svg` },
         editions,
         attributes: TRAITS.map((entry) => ({

@@ -235,7 +235,25 @@ O seed da aleatoriedade de cenário é fixo (`21`), escolhido para que as
 primeiras ~20 amostras reflitam a taxa de falha configurada em vez de um surto
 atípico — importante porque um teste curto observa justamente essa janela.
 
-## 9. Desvios e correções do Figma
+## 9. Desvios do Figma e decisões de UX
+
+As subseções abaixo registram tanto os desvios em relação ao arquivo quanto as
+decisões de experiência tomadas onde o design não respondia. Índice rápido:
+
+| Decisão de UX                                                | Onde                                                                         |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| "Mercado" ganhou rota própria, e o que isso resolveu         | [§9 "Mercado" como rota própria](#mercado-como-rota-própria)                 |
+| Busca ao vivo: `replace` ao digitar, `push` no Enter         | [§9 Busca ao vivo](#busca-ao-vivo)                                           |
+| Dois botões "Salvar" no perfil, em vez de um                 | [§9 Perfil do colecionador e Carteiras](#perfil-do-colecionador-e-carteiras) |
+| "Lista de interesse" implementada; os demais itens inertes   | [§9 Perfil do colecionador e Carteiras](#perfil-do-colecionador-e-carteiras) |
+| Modal de pedido abre em `pending` e segue o desfecho         | [§9 Modal de conclusão do pedido](#modal-de-conclusão-do-pedido)             |
+| "Ver no Etherscan" inerte, por ser link simulado             | [§9 Modal de conclusão do pedido](#modal-de-conclusão-do-pedido)             |
+| Endereço da carteira exibido por inteiro no modal de conexão | [§9 Endereços longos](#endereços-longos-e-caixas-que-não-encolhem)           |
+| Galeria do detalhe com uma arte, sem repetição               | [§9 Galeria do detalhe](#galeria-do-detalhe)                                 |
+| Drawer no lugar da barra de abas com botão flutuante         | [§9 Navegação mobile](#navegação-mobile)                                     |
+| Ações fora do escopo inertes, nunca links mortos             | [§9 Decisões de conteúdo](#decisões-de-conteúdo)                             |
+
+### Nome do produto
 
 ### Nome do produto
 
@@ -617,6 +635,27 @@ e `sessionId`.
   fora nunca foi entregue e não pode ser reproduzido, então as queries ativas
   são invalidadas e o REST é a autoridade.
 - **Listeners são liberados** no unmount e a cada troca de identidade.
+
+### Reconciliação entre REST e Socket.IO
+
+As duas fontes nunca disputam: **o REST é a autoridade, o socket é a
+aceleração.** O que o socket entrega é sempre uma mudança que o REST também
+devolveria se perguntado — por isso é seguro descartar um evento, e nunca é
+seguro descartar uma resposta REST.
+
+| Momento                     | O que reconcilia                                                                       | Por quê                                                                                                        |
+| --------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Reconexão**               | `invalidateQueries` no catálogo (`['nfts']`) e em tudo do dono (`['owner', ownerKey]`) | O que aconteceu com o socket fora nunca foi entregue e não pode ser reproduzido; só o REST sabe o estado atual |
+| **Refresh / acesso direto** | O loader da rota lê pelo cache do Query, que busca no REST                             | Nenhum estado de tela depende de um evento ter sido recebido antes                                             |
+| **Pedido pendente**         | `GET /orders/:id` continua consultando até o estado terminal                           | Garante o desfecho mesmo que o `order.updated` se perca                                                        |
+| **Troca de identidade**     | Assinatura refeita e cache privado removido por prefixo                                | Evento de uma sessão não pode tocar dados de outra                                                             |
+
+Dentro de uma mesma fonte, a ordem é resolvida por **versão, não por chegada**:
+todo recurso carrega `version` monotônica e o _version ledger_ descarta
+qualquer evento com versão menor ou igual à já aplicada. Um `order.updated`
+atrasado não reabre um pedido já confirmado, e uma resposta REST antiga não
+regride um preço que o socket já atualizou — o estado mais novo vence,
+independentemente de qual caminho chegou primeiro.
 
 ### Limitações do transporte no ambiente de mocks
 

@@ -56,13 +56,35 @@ export async function request<TSchema extends z.ZodType>(
   config: AxiosRequestConfig,
 ): Promise<z.infer<TSchema>> {
   const response = await api.request(config)
-  const parsed = schema.safeParse(response.data)
+  const where = `${config.method?.toUpperCase() ?? 'GET'} ${config.url}`
 
-  if (!parsed.success) {
+  if (looksLikeAppShell(response.data)) {
     throw new Error(
-      `Resposta fora do contrato em ${config.method?.toUpperCase() ?? 'GET'} ${config.url}: ${parsed.error.message}`,
+      `A camada de mocks não respondeu a ${where}: o service worker não está ` +
+        'ativo nesta aba, então a requisição chegou ao servidor estático e ' +
+        'recebeu o index.html. Recarregue a página para registrá-lo de novo.',
     )
   }
 
+  const parsed = schema.safeParse(response.data)
+
+  if (!parsed.success) {
+    throw new Error(`Resposta fora do contrato em ${where}: ${parsed.error.message}`)
+  }
+
   return parsed.data
+}
+
+/**
+ * Detects a request that escaped the mock layer.
+ *
+ * Every REST route is served by the MSW service worker. When the worker is not
+ * controlling the page — most often because the bundle was rebuilt while the
+ * tab stayed open, which replaces the registration under it — the request
+ * reaches the static server instead, and an SPA host answers *any* unmatched
+ * path with `index.html` and a 200. The schema then reports "expected object,
+ * received string", which is true but says nothing about the actual problem.
+ */
+function looksLikeAppShell(data: unknown): boolean {
+  return typeof data === 'string' && /^\s*<(!doctype|html)/i.test(data)
 }

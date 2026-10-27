@@ -2,6 +2,32 @@ import { USERS, expect, test } from './support/fixtures'
 
 /** Flow 8 — profile, avatar, password and wallets, with validation errors. */
 test.describe('conta do colecionador', () => {
+  test('o ícone de Sair herda a cor do item, como os demais', async ({
+    page,
+    visit,
+    signIn,
+  }) => {
+    await signIn()
+    await visit('/perfil')
+
+    // The icon shipped with a hard-coded ink stroke, so it rendered black in
+    // the sidebar while every other item was accent-coloured. Asserting that
+    // it inherits is what keeps it honest, not a hex value in a test.
+    const colours = await page.evaluate(() => {
+      const nav = document.querySelector('nav[aria-label="Minha conta"]')!
+      const signOut = [...nav.querySelectorAll('button')].find((button) =>
+        button.textContent?.includes('Sair'),
+      )!
+      const icon = signOut.querySelector('svg path')!
+      return {
+        icon: getComputedStyle(icon).stroke,
+        label: getComputedStyle(signOut).color,
+      }
+    })
+
+    expect(colours.icon).toBe(colours.label)
+  })
+
   test('edição do perfil persiste após refresh', async ({ page, visit, signIn }) => {
     await signIn()
     await visit('/perfil')

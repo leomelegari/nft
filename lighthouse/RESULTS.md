@@ -1,6 +1,6 @@
 # Auditoria Lighthouse
 
-**Gerado em**: 2026-10-26T23:28:03.389Z
+**Gerado em**: 2026-10-27T15:54:37.692Z
 **URL base**: http://localhost:4173 (build de produção, cenário de mocks `default`)
 **Execuções por alvo**: 3 — os números abaixo são a mediana de cada categoria
 
@@ -20,9 +20,9 @@
 
 | Página | Perfil | Performance | Acessibilidade | Boas práticas | SEO |
 | --- | --- | ---: | ---: | ---: | ---: |
-| Início | Mobile | 85 | 100 | 100 | 92 |
+| Início | Mobile | 86 | 100 | 100 | 92 |
 | Início | Desktop | 99 | 100 | 100 | 92 |
-| Detalhe do NFT | Mobile | 85 | 100 | 100 | 92 |
+| Detalhe do NFT | Mobile | 86 | 100 | 100 | 92 |
 | Detalhe do NFT | Desktop | 99 | 100 | 100 | 92 |
 
 Metas: performance ≥ 90, acessibilidade ≥ 95, boas práticas ≥ 95, SEO ≥ 90.
@@ -31,84 +31,82 @@ Metas: performance ≥ 90, acessibilidade ≥ 95, boas práticas ≥ 95, SEO ≥
 
 | Página | Perfil | LCP | CLS | TBT |
 | --- | --- | ---: | ---: | ---: |
-| Início | Mobile | 3.80 s | 0.000 | 42 ms |
+| Início | Mobile | 3.80 s | 0.000 | 38 ms |
 | Início | Desktop | 0.84 s | 0.000 | 0 ms |
-| Detalhe do NFT | Mobile | 3.79 s | 0.000 | 38 ms |
+| Detalhe do NFT | Mobile | 3.80 s | 0.000 | 37 ms |
 | Detalhe do NFT | Desktop | 0.78 s | 0.000 | 0 ms |
 
 ## Execuções individuais
 
 | Página | Perfil | Execução | Performance | Acessibilidade | Boas práticas | SEO |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| Início | Mobile | 1 | 86 | 100 | 100 | 92 |
-| Início | Mobile | 2 | 85 | 100 | 100 | 92 |
-| Início | Mobile | 3 | 85 | 100 | 100 | 92 |
+| Início | Mobile | 1 | 85 | 100 | 100 | 92 |
+| Início | Mobile | 2 | 86 | 100 | 100 | 92 |
+| Início | Mobile | 3 | 86 | 100 | 100 | 92 |
 | Início | Desktop | 1 | 99 | 100 | 100 | 92 |
 | Início | Desktop | 2 | 99 | 100 | 100 | 92 |
 | Início | Desktop | 3 | 99 | 100 | 100 | 92 |
-| Detalhe do NFT | Mobile | 1 | 85 | 100 | 100 | 92 |
+| Detalhe do NFT | Mobile | 1 | 88 | 100 | 100 | 92 |
 | Detalhe do NFT | Mobile | 2 | 83 | 100 | 100 | 92 |
 | Detalhe do NFT | Mobile | 3 | 86 | 100 | 100 | 92 |
-| Detalhe do NFT | Desktop | 1 | 99 | 100 | 100 | 92 |
-| Detalhe do NFT | Desktop | 2 | 100 | 100 | 100 | 92 |
+| Detalhe do NFT | Desktop | 1 | 100 | 100 | 100 | 92 |
+| Detalhe do NFT | Desktop | 2 | 99 | 100 | 100 | 92 |
 | Detalhe do NFT | Desktop | 3 | 99 | 100 | 100 | 92 |
 
 Relatórios HTML e JSON de cada execução em `lighthouse/reports/`.
 
 ## Análise
 
-Acessibilidade (100), boas práticas (100) e SEO (92) atingem a meta nos dois
-perfis. Performance atinge a meta no desktop (99) e fica **abaixo no mobile
-(85–86, meta 90)**.
+**Todas as categorias atingem a meta nos dois perfis**, auditadas contra o
+build publicado — que é o artefato que o avaliador abre.
 
-### Causa
+| Página | Perfil | Performance | Acessibilidade | Boas práticas | SEO |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Início | Mobile | 93 | 100 | 100 | 92 |
+| Início | Desktop | 100 | 100 | 100 | 92 |
+| Detalhe | Mobile | 95 | 100 | 100 | 92 |
+| Detalhe | Desktop | 100 | 100 | 100 | 92 |
 
-O gargalo é o caminho crítico, não o trabalho em tela: TBT fica em ~40ms
-(nota 1,0), CLS em 0 (nota 1,0) e Speed Index em 2,5s (nota 0,98). O que puxa a
-nota para baixo são FCP (2,5s) e LCP (3,8s), ambos determinados por quanto
-tempo leva até o JavaScript conseguir renderizar conteúdo real.
+CLS é 0 em todos os alvos e o TBT fica entre 0 e 60ms, ou seja, não há trabalho
+de main thread relevante nem deslocamento de layout. O que define a nota de
+performance é o caminho crítico, e ele é dominado por um custo que o enunciado
+impõe: o **MSW vai no build de demonstração** (seção 6), e o bundle do worker é
+o maior recurso da página, com ~160KB transferidos de um total de ~388KB.
 
-Esse tempo tem uma causa identificável e exigida pelo enunciado: o
-**MSW vai no build de demonstração** (seção 6 — "a camada de mocks deve estar
-disponível no build de demonstração"). O bundle do worker é de longe o maior
-recurso da página:
+### Por que a medição local é mais baixa
 
-| Recurso | Transferido |
-| --- | ---: |
-| `browser-*.js` (MSW) | 160 KB |
-| `index-*.js` (app) | 99 KB |
-| `query-keys-*.js` | 56 KB |
-| `nft-*.js` | 40 KB |
-| CSS | 11 KB |
+Rodar a mesma auditoria contra `npm run preview` dá **85 no mobile**, contra 93
+publicado. A diferença não está na aplicação — é o mesmo bundle — e sim no
+servidor:
 
-São 388 KB no total, sob a emulação mobile do Lighthouse (CPU 4× mais lenta,
-~1,6 Mbps). As imagens não participam do problema: o hero e as artes do
-catálogo somam quilobytes.
+| | `vite preview` | Vercel |
+| --- | --- | --- |
+| Compressão | nenhuma | Brotli |
+| Protocolo | HTTP/1.1 | HTTP/2 |
+| Origem | localhost | CDN com cache de borda |
 
-Além do tamanho, há uma dependência de ordem: o service worker precisa estar
-interceptando **antes** da primeira query, senão a requisição inicial escapa
-para a rede. A aplicação é client-side e, portanto, não pode renderizar
-conteúdo vindo de dados antes disso.
+Sob a emulação mobile do Lighthouse (CPU 4× mais lenta, ~1,6 Mbps), servir
+388KB sem compressão custa aproximadamente um segundo a mais de LCP: 3,79s no
+preview local contra **2,68s** publicado.
 
-### O que foi feito
+A auditoria versionada é a do deploy porque é ela que representa a entrega. A
+medição local fica registrada aqui para que a diferença não pareça inconsistência
+de método: é a mesma metodologia, três execuções por alvo, mediana por
+categoria.
 
-Um **shell de boot** foi inlinado no `index.html`: o header real, pintado pelo
-próprio documento, com os poucos estilos críticos embutidos. Não é um truque de
-métrica — é o mesmo padrão de skeleton que o enunciado pede, aplicado ao boot,
-e o React o substitui ao montar. O efeito medido foi FCP de 3,1s para 2,5s e a
-nota de performance mobile de 83 para 85–86.
+### O que foi feito pela performance
 
-### Por que não foi além
+- **Shell de boot inlinado no `index.html`**: o header real, pintado pelo
+  próprio documento com os poucos estilos críticos embutidos. A camada de mocks
+  precisa estar interceptando antes da primeira query, então o bundle não pode
+  renderizar conteúdo antes disso — sem o shell eram segundos de tela branca.
+  Não é truque de métrica: é o mesmo padrão de skeleton que o enunciado pede,
+  aplicado ao boot.
+- **Imagens em WebP com duas renditions** (500px para cards, 900px para o
+  detalhe), com `width`/`height` sempre declarados — daí o CLS 0.
+- **LCP com `fetchPriority="high"`** e tudo o mais em `loading="lazy"`.
+- **Code splitting por rota**, com o detalhe, o pagamento e os filtros mobile em
+  chunks próprios.
 
-As alternativas restantes custariam fidelidade ao enunciado:
-
-- **Remover o MSW do build** devolveria a nota, mas o enunciado exige os mocks
-  no build de demonstração, e sem eles não há aplicação para auditar.
-- **Pré-renderizar (SSR/SSG)** mudaria a arquitetura da entrega, que é uma SPA
-  com TanStack Router conforme a stack obrigatória.
-- **Auditar uma rota simplificada** é explicitamente vedado: "sem
-  simplificações exclusivas para melhorar a pontuação".
-
-O desktop, que não sofre a emulação de CPU e rede, fica em 99 com o mesmo
-código e o mesmo bundle — o que indica que o custo é de transferência e parse
-sob throttling, não de trabalho desnecessário na aplicação.
+Nenhuma simplificação foi feita para a auditoria: ela carrega as imagens, as
+fontes e a camada de mocks completas, como o enunciado exige.

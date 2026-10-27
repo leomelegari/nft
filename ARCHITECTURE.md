@@ -573,6 +573,23 @@ backend, e não lógica de UI.
 - **O cupom vive na URL** (`/carrinho?cupom=`), então sobrevive a refresh e é
   restaurado pelo histórico junto com o carrinho.
 
+### O cupom viaja com a navegação
+
+O cupom aplicado vive em `?cupom=` — no carrinho e no pagamento. O link
+"Conectar e finalizar" não o repassava, e a consequência não era só visual: a
+tela de pagamento passava a cotar **sem** cupom, e o `useCheckout` também, de
+modo que a revalidação final antes de confirmar saía sem desconto e o pedido
+seria cobrado pelo preço cheio.
+
+O sintoma parecia intermitente porque dependia do cache. Numa navegação dentro
+do app a tela reaproveitava a cotação anterior e ainda mostrava o desconto —
+que a compra não honraria. Num carregamento novo (refresh, link direto) a
+cotação saía com `{}` e o desconto simplesmente sumia da tela.
+
+Cobertos por E2E: a URL de pagamento carrega o cupom, a cotação após refresh
+volta com desconto, e o pedido gravado tem `coupon.code` e `discountEth > 0` —
+a asserção é sobre o valor cobrado, não sobre o que a tela exibe.
+
 ## 9.3 Checkout e idempotência
 
 A submissão segue, deliberadamente, a ordem **recotar → inspecionar → enviar**:

@@ -158,7 +158,17 @@ export function CartSummary({
           {checkoutDisabled ? (
             <span>Conectar e finalizar</span>
           ) : (
-            <Link to="/pagamento">Conectar e finalizar</Link>
+            /*
+              The coupon travels with the link. It lives in the URL on both
+              screens, so dropping it here left the payment screen quoting
+              without it: on a fresh load the discount vanished, and the order
+              would have been submitted at full price. On a client-side
+              navigation it was worse — the screen could still show a cached
+              discounted quote that the submission would not honour.
+            */
+            <Link to="/pagamento" search={appliedCoupon ? { cupom: appliedCoupon } : {}}>
+              Conectar e finalizar
+            </Link>
           )}
         </Button>
         <Link to="/" hash="catalogo" className="rounded-sm text-body-md text-text-accent">
